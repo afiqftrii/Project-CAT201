@@ -403,7 +403,7 @@ function validateProductData(product) {
 }
 
 async function loadProducts(category = null) {
-    console.log("Loading products...");
+    console.log("Loading products... Category:", category);
     
     const productGrid = document.querySelector('.productGrid');
     
@@ -412,11 +412,13 @@ async function loadProducts(category = null) {
         return;
     }
     
+    productGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 50px;">Loading products...</div>';
+    
     try {
         const products = await ApiService.getProducts(category);
-        console.log("Products received:", products.length);
+        console.log("Products received:", products);
         
-        if (products.length === 0) {
+        if (!products || products.length === 0) {
             productGrid.innerHTML = `
                 <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
                     <h3>No products available</h3>
@@ -431,6 +433,10 @@ async function loadProducts(category = null) {
         
         productGrid.innerHTML = '';
         products.forEach(product => {
+            if (!product || !product.id) {
+                console.error('Invalid product:', product);
+                return;
+            }
             const productElement = createProductElement(product);
             productGrid.innerHTML += productElement;
         });
@@ -441,7 +447,8 @@ async function loadProducts(category = null) {
         productGrid.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #666;">
                 <h3>Unable to load products</h3>
-                <p>Server might be offline. Please try again later.</p>
+                <p>Error: ${error.message}</p>
+                <p>Please check if server is running at ${API_BASE_URL}</p>
             </div>
         `;
     }
