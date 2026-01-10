@@ -20,169 +20,6 @@ function initializeApp() {
     checkLoginStatus();
 }
 
-// ========== DATA MANAGEMENT ==========
-/*function initData() {
-    // Initialize users if empty
-    if (!localStorage.getItem('users')) {
-        const defaultUsers = [
-            {
-                id: '1',
-                username: 'admin',
-                email: 'admin@usm.my',
-                password: 'admin123',
-                role: 'admin',
-                matric: 'ADMIN001'
-            },
-            {
-                id: '2', 
-                username: 'student',
-                email: 'student@usm.my',
-                password: 'student123',
-                role: 'student',
-                matric: '22304500'
-            }
-        ];
-        localStorage.setItem('users', JSON.stringify(defaultUsers));
-    }
-    
-    // In initData() function, replace the defaultProducts array with:
-    if (!localStorage.getItem('products')) {
-        const defaultProducts = [
-            {
-                id: '1',
-                name: 'Nike Shoes',
-                price: 123.99,
-                category: 'Clothes',
-                seller: 'Hanafi Zaharuddin',
-                condition: 'Used: Like New',
-                image: 'pic/kasut1.jpg',
-                description: 'High-quality Nike running shoes in excellent condition'
-            },
-            {
-                id: '2',
-                name: 'Office Desk',
-                price: 53.45,
-                category: 'Home Appliances',
-                seller: 'Qaid Mubasyir',
-                condition: 'New',
-                image: 'pic/Office Desk.jpg',
-                description: 'Wooden office desk, perfect for study'
-            },
-            {
-                id: '3',
-                name: 'Jisulife Portable Fan',
-                price: 12.20,
-                category: 'Electronics',
-                seller: 'Raja Adam',
-                condition: 'Used: Good',
-                image: 'pic/Jisulife Portable Fan.jpg',
-                description: 'Portable USB fan with battery'
-            },
-            {
-                id: '4',
-                name: 'Calculator',
-                price: 20.99,
-                category: 'Education',
-                seller: 'Afiq Fitri',
-                condition: 'Used: Poor',
-                image: 'pic/Casio Calculator.jpg',
-                description: 'Casio scientific calculator'
-            },
-            {
-                id: '5',
-                name: 'Blue Shirt Size XL',
-                price: 5.00,
-                category: 'Clothes',
-                seller: 'Hanafi Zaharuddin',
-                condition: 'Used: Good',
-                image: 'pic/blue shirt.jpg',
-                description: 'Blue casual shirt, size XL'
-            },
-            {
-                id: '6',
-                name: 'iPhone 13 256GB White',
-                price: 1151.99,
-                category: 'Electronics',
-                seller: 'Afiq Fitri',
-                condition: 'Used: Like New',
-                image: 'pic/iPhone 13 second.jpg',
-                description: 'iPhone 13 in excellent condition'
-            },
-            {
-                id: '7',
-                name: 'IKEA Wood Chair',
-                price: 23.99,
-                category: 'Home Appliances',
-                seller: 'Arif Isahak',
-                condition: 'Used: Good',
-                image: 'pic/IKEA NORDVIKEN chair.jpg',
-                description: 'IKEA wooden chair'
-            },
-            {
-                id: '8',
-                name: 'Ninja Air Fryer',
-                price: 80.00,
-                category: 'Home Appliances',
-                seller: 'Danish',
-                condition: 'Used: Like New',
-                image: 'pic/Ninja Air Fryer.jpg',
-                description: 'Ninja air fryer in good condition'
-            },
-            {
-                id: '9',
-                name: 'Men\'s Axis Pant Size M',
-                price: 13.49,
-                category: 'Clothes',
-                seller: 'Syazwan',
-                condition: 'Used: Good',
-                image: 'pic/Men\'s Axis Pant.jpg',
-                description: 'Men\'s axis pant size M'
-            },
-            {
-                id: '10',
-                name: 'Magsafe iPhone 16 Pro Case',
-                price: 9.00,
-                category: 'Electronics',
-                seller: 'Muhammad',
-                condition: 'Used: Like New',
-                image: 'pic/Magsafe iPhone 16 Pro Case.jpg',
-                description: 'Magsafe iPhone case'
-            },
-            {
-                id: '11',
-                name: 'School Beg',
-                price: 12.79,
-                category: 'Education',
-                seller: 'Ahmad',
-                condition: 'Used: Like New',
-                image: 'pic/Beg Sekolah.jpg',
-                description: 'School bag'
-            },
-            {
-                id: '12',
-                name: 'Adidas Train Short',
-                price: 3.00,
-                category: 'Clothes',
-                seller: 'Amirul',
-                condition: 'Used: Poor',
-                image: 'pic/Adidas Train Short.jpg',
-                description: 'Adidas training shorts'
-            }
-        ];
-        localStorage.setItem('products', JSON.stringify(defaultProducts));
-    }
-    
-    // Initialize cart if empty
-    if (!localStorage.getItem('cart')) {
-        localStorage.setItem('cart', JSON.stringify([]));
-    }
-    
-    // Initialize orders if empty
-    if (!localStorage.getItem('orders')) {
-        localStorage.setItem('orders', JSON.stringify([]));
-    }
-}*/
-
 // ========== PAGE DETECTION ==========
 function isHomePage() {
     return window.location.pathname.includes('index.html') || 
@@ -206,6 +43,484 @@ function isAdminPage() {
     return window.location.pathname.includes('admin.html');
 }
 
+// ========== MODAL SERVICE ==========
+class ModalService {
+    static showLoginModal(redirectAction = 'add-to-cart', productId = null) {
+        // Remove any existing modals first
+        this.closeAllModals();
+        
+        let message = '';
+        let buttons = '';
+        
+        switch(redirectAction) {
+            case 'add-to-cart':
+                message = 'Please login to add items to your cart.';
+                buttons = `
+                    <button onclick="ModalService.redirectToLogin('${redirectAction}', '${productId}')" 
+                            class="modal-btn primary">
+                        🔐 Login Now
+                    </button>
+                    <button onclick="ModalService.closeAllModals()" 
+                            class="modal-btn secondary">
+                        Continue Shopping
+                    </button>
+                `;
+                break;
+                
+            case 'view-cart':
+                message = 'Please login to view your shopping cart.';
+                buttons = `
+                    <button onclick="ModalService.redirectToLogin('${redirectAction}')" 
+                            class="modal-btn primary">
+                        🔐 Login Now
+                    </button>
+                    <button onclick="ModalService.closeAllModals()" 
+                            class="modal-btn secondary">
+                        Continue Shopping
+                    </button>
+                `;
+                break;
+                
+            case 'sell':
+                message = 'Please login to sell items on USM E-Mart.';
+                buttons = `
+                    <button onclick="ModalService.redirectToLogin('${redirectAction}')" 
+                            class="modal-btn primary">
+                        🔐 Login Now
+                    </button>
+                    <button onclick="ModalService.closeAllModals()" 
+                            class="modal-btn secondary">
+                        Maybe Later
+                    </button>
+                `;
+                break;
+                
+            case 'checkout':
+                message = 'Please login to complete your purchase.';
+                buttons = `
+                    <button onclick="ModalService.redirectToLogin('${redirectAction}')" 
+                            class="modal-btn primary">
+                        🔐 Login Now
+                    </button>
+                    <button onclick="ModalService.closeAllModals()" 
+                            class="modal-btn secondary">
+                        Continue Shopping
+                    </button>
+                `;
+                break;
+        }
+        
+        const modalHTML = `
+        <div id="loginRequiredModal" class="custom-modal" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: modalFadeIn 0.3s ease;
+        ">
+            <div class="modal-content" style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 0;
+                border-radius: 20px;
+                max-width: 450px;
+                width: 90%;
+                overflow: hidden;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                animation: modalSlideUp 0.4s ease;
+            ">
+                <!-- Modal Header -->
+                <div style="
+                    background: rgba(255,255,255,0.1);
+                    padding: 30px 30px 20px;
+                    text-align: center;
+                    border-bottom: 1px solid rgba(255,255,255,0.2);
+                ">
+                    <div style="
+                        width: 80px;
+                        height: 80px;
+                        background: rgba(255,255,255,0.2);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 20px;
+                        backdrop-filter: blur(10px);
+                    ">
+                        <span style="color: white; font-size: 40px;">🔒</span>
+                    </div>
+                    <h3 style="
+                        margin: 0;
+                        color: white;
+                        font-size: 24px;
+                        font-weight: bold;
+                    ">Login Required</h3>
+                </div>
+                
+                <!-- Modal Body -->
+                <div style="
+                    padding: 30px;
+                    background: white;
+                    color: #333;
+                    text-align: center;
+                ">
+                    <p style="
+                        margin: 0 0 25px 0;
+                        font-size: 16px;
+                        line-height: 1.6;
+                        color: #555;
+                    ">${message}</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        ${buttons}
+                    </div>
+                    
+                    <div style="
+                        margin-top: 25px;
+                        padding: 15px;
+                        background: #f8f9fa;
+                        border-radius: 10px;
+                        border-left: 4px solid #4CAF50;
+                    ">
+                        <p style="
+                            margin: 0;
+                            font-size: 14px;
+                            color: #666;
+                            text-align: left;
+                        ">
+                            <strong>Demo Accounts:</strong><br>
+                            👑 Admin: admin@usm.my / admin123<br>
+                            👨‍🎓 Student: student@usm.my / student123
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Modal Footer -->
+                <div style="
+                    padding: 15px 30px;
+                    background: rgba(255,255,255,0.05);
+                    text-align: center;
+                    border-top: 1px solid rgba(255,255,255,0.1);
+                ">
+                    <p style="
+                        margin: 0;
+                        color: rgba(255,255,255,0.7);
+                        font-size: 12px;
+                    ">
+                        USM Students Only • Secure Login
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes modalFadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            @keyframes modalSlideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px) scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+        </style>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        document.body.style.overflow = 'hidden';
+    }
+    
+    static redirectToLogin(action, productId = null) {
+        // Store the intended action in localStorage
+        if (productId) {
+            localStorage.setItem('pendingAction', JSON.stringify({
+                action: action,
+                productId: productId
+            }));
+        } else {
+            localStorage.setItem('pendingAction', JSON.stringify({
+                action: action
+            }));
+        }
+        
+        window.location.href = 'login.html';
+    }
+    
+    static showSuccessModal(title, message, options = {}) {
+        this.closeAllModals();
+        
+        const showCartButton = options.showCartButton || false;
+        const autoClose = options.autoClose || true;
+        const timeout = options.timeout || 3000;
+        
+        const modalHTML = `
+        <div id="successModal" class="custom-modal" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: modalFadeIn 0.3s ease;
+        ">
+            <div style="
+                background: white;
+                padding: 40px;
+                border-radius: 20px;
+                max-width: 400px;
+                width: 90%;
+                text-align: center;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                animation: modalSlideUp 0.4s ease;
+                border-top: 5px solid #4CAF50;
+                position: relative;
+            ">
+                <button onclick="ModalService.closeAllModals()" style="
+                    position: absolute;
+                    top: 15px;
+                    right: 15px;
+                    background: #f0f0f0;
+                    color: #666;
+                    border: none;
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    font-size: 18px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s;
+                " onmouseover="this.style.background='#e0e0e0'"
+                onmouseout="this.style.background='#f0f0f0'">×</button>
+                
+                <div style="margin-bottom: 25px;">
+                    <div style="
+                        width: 80px;
+                        height: 80px;
+                        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 20px;
+                        animation: successIcon 0.5s ease;
+                    ">
+                        <span style="color: white; font-size: 40px;">✓</span>
+                    </div>
+                    <h3 style="margin: 0 0 10px 0; color: #333; font-size: 24px;">${title}</h3>
+                    <p style="color: #666; margin-bottom: 30px; line-height: 1.5;">${message}</p>
+                </div>
+                
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <button onclick="ModalService.closeAllModals()" style="
+                        flex: 1;
+                        padding: 15px;
+                        background: #f0f0f0;
+                        color: #333;
+                        border: none;
+                        border-radius: 10px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        transition: all 0.3s;
+                        min-width: 120px;
+                    " onmouseover="this.style.background='#e0e0e0'"
+                    onmouseout="this.style.background='#f0f0f0'">
+                        Continue Shopping
+                    </button>
+                    
+                    ${showCartButton ? `
+                    <button onclick="window.location.href='cart.html'" style="
+                        flex: 1;
+                        padding: 15px;
+                        background: linear-gradient(135deg, #333 0%, #555 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 10px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        transition: all 0.3s;
+                        min-width: 120px;
+                    " onmouseover="this.style.background='linear-gradient(135deg, #555 0%, #777 100%)'"
+                    onmouseout="this.style.background='linear-gradient(135deg, #333 0%, #555 100%)'">
+                        🛒 View Cart
+                    </button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes successIcon {
+                0% {
+                    transform: scale(0);
+                    opacity: 0;
+                }
+                70% {
+                    transform: scale(1.2);
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+        </style>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        document.body.style.overflow = 'hidden';
+        
+        if (autoClose) {
+            setTimeout(() => {
+                this.closeAllModals();
+            }, timeout);
+        }
+    }
+    
+    static showErrorModal(title, message) {
+        this.closeAllModals();
+        
+        const modalHTML = `
+        <div id="errorModal" class="custom-modal" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: modalFadeIn 0.3s ease;
+        ">
+            <div style="
+                background: white;
+                padding: 40px;
+                border-radius: 20px;
+                max-width: 400px;
+                width: 90%;
+                text-align: center;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                animation: modalSlideUp 0.4s ease;
+                border-top: 5px solid #ff4444;
+            ">
+                <div style="margin-bottom: 25px;">
+                    <div style="
+                        width: 80px;
+                        height: 80px;
+                        background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 20px;
+                    ">
+                        <span style="color: white; font-size: 40px;">!</span>
+                    </div>
+                    <h3 style="margin: 0 0 10px 0; color: #333; font-size: 24px;">${title}</h3>
+                    <p style="color: #666; margin-bottom: 30px; line-height: 1.5;">${message}</p>
+                </div>
+                
+                <button onclick="ModalService.closeAllModals()" style="
+                    width: 100%;
+                    padding: 15px;
+                    background: linear-gradient(135deg, #333 0%, #555 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: all 0.3s;
+                " onmouseover="this.style.background='linear-gradient(135deg, #555 0%, #777 100%)'"
+                onmouseout="this.style.background='linear-gradient(135deg, #333 0%, #555 100%)'">
+                    Okay, I Understand
+                </button>
+            </div>
+        </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        document.body.style.overflow = 'hidden';
+    }
+    
+    static closeAllModals() {
+        const modals = document.querySelectorAll('.custom-modal');
+        modals.forEach(modal => {
+            modal.style.animation = 'modalFadeOut 0.3s ease';
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.remove();
+                }
+            }, 300);
+        });
+        document.body.style.overflow = 'auto';
+        
+        // Add fade out animation if not exists
+        if (!document.querySelector('#modalAnimations')) {
+            const style = document.createElement('style');
+            style.id = 'modalAnimations';
+            style.textContent = `
+                @keyframes modalFadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    
+    static checkPendingAction() {
+        const pendingAction = localStorage.getItem('pendingAction');
+        if (pendingAction) {
+            const action = JSON.parse(pendingAction);
+            localStorage.removeItem('pendingAction');
+            
+            const user = getCurrentUser();
+            if (user) {
+                switch(action.action) {
+                    case 'add-to-cart':
+                        if (action.productId) {
+                            setTimeout(() => {
+                                addToCart(action.productId);
+                            }, 100);
+                        }
+                        break;
+                    case 'view-cart':
+                        window.location.href = 'cart.html';
+                        break;
+                    case 'sell':
+                        window.location.href = 'sell.html';
+                        break;
+                    case 'checkout':
+                        window.location.href = 'cart.html';
+                        break;
+                }
+            }
+        }
+    }
+}
+
+// Add to window object for global access
+window.ModalService = ModalService;
+
 // ========== EVENT LISTENERS ==========
 function setupEventListeners() {
     // SELL button - works on any page
@@ -216,8 +531,7 @@ function setupEventListeners() {
             if (user) {
                 window.location.href = 'sell.html';
             } else {
-                alert('Please login to sell items');
-                window.location.href = 'login.html';
+                ModalService.showLoginModal('sell');
             }
         }
         
@@ -228,8 +542,7 @@ function setupEventListeners() {
             if (user) {
                 window.location.href = 'cart.html';
             } else {
-                alert('Please login to view cart');
-                window.location.href = 'login.html';
+                ModalService.showLoginModal('view-cart');
             }
         }
     });
@@ -282,32 +595,35 @@ function setupEventListeners() {
     }
 
     const imageUpload = document.getElementById('imageUpload');
-if (imageUpload) {
-    imageUpload.addEventListener('change', function() {
-        const preview = document.getElementById('imagePreview');
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                preview.innerHTML = `
-                    <img src="${e.target.result}" 
-                         style="max-width: 200px; max-height: 200px; border-radius: 5px; margin-top: 10px;">
-                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                        Image preview (${Math.round(imageUpload.files[0].size / 1024)} KB)
-                    </p>
-                `;
+    if (imageUpload) {
+        imageUpload.addEventListener('change', function() {
+            const preview = document.getElementById('imagePreview');
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" 
+                             style="max-width: 200px; max-height: 200px; border-radius: 5px; margin-top: 10px;">
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                            Image preview (${Math.round(imageUpload.files[0].size / 1024)} KB)
+                        </p>
+                    `;
+                }
+                
+                reader.readAsDataURL(this.files[0]);
             }
-            
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
-}
+        });
+    }
 }
 
 // ========== USER MANAGEMENT ==========
 function checkLoginStatus() {
     const user = getCurrentUser();
     updateUIForLoggedInUser(user);
+    
+    // Check for pending actions after login
+    ModalService.checkPendingAction();
 }
 
 function getCurrentUser() {
@@ -366,7 +682,6 @@ function updateUIForLoggedInUser(user) {
     }
 }
 
-// Replace the entire handleLogin function with this:
 async function handleLogin(e) {
     e.preventDefault();
     
@@ -384,7 +699,7 @@ async function handleLogin(e) {
                 role: result.role
             }));
             
-            alert(result.message || 'Login successful!');
+            ModalService.showSuccessModal('Login Successful', 'Welcome to USM E-Mart!');
             
             if (result.role === 'admin') {
                 window.location.href = 'admin.html';
@@ -392,11 +707,11 @@ async function handleLogin(e) {
                 window.location.href = 'index.html';
             }
         } else {
-            alert(result.message || 'Login failed');
+            ModalService.showErrorModal('Login Failed', result.message || 'Please check your credentials.');
         }
     } catch (error) {
         console.error('Login error:', error);
-        alert('Login failed. Please check server connection.');
+        ModalService.showErrorModal('Login Failed', 'Login failed. Please check server connection.');
     }
 }
 
@@ -404,12 +719,12 @@ async function logout() {
     try {
         const result = await ApiService.logout();
         localStorage.removeItem('currentUser');
-        alert(result.message || 'Logged out successfully');
+        ModalService.showSuccessModal('Logged Out', 'You have been successfully logged out.');
         window.location.href = 'index.html';
     } catch (error) {
         console.error('Logout error:', error);
         localStorage.removeItem('currentUser');
-        alert('Logged out successfully');
+        ModalService.showSuccessModal('Logged Out', 'You have been successfully logged out.');
         window.location.href = 'index.html';
     }
 }
@@ -520,16 +835,15 @@ function filterByCategory(category) {
     loadProducts(category);
 }
 
-
 async function viewProduct(productId) {
     try {
         const product = await ApiService.getProductById(productId);
         if (!product) {
-            alert('Product not found');
+            ModalService.showErrorModal('Product Not Found', 'The requested product could not be found.');
             return;
         }
         
-        // Create modal HTML (same as before, but with product from API)
+        // Create modal HTML
         const modalHTML = `
         <div id="productModal" style="
             position: fixed;
@@ -683,7 +997,7 @@ async function viewProduct(productId) {
         
     } catch (error) {
         console.error('View product error:', error);
-        alert('Error loading product details');
+        ModalService.showErrorModal('Error', 'Error loading product details.');
     }
 }
 
@@ -704,8 +1018,7 @@ document.addEventListener('keydown', function(e) {
 async function addToCart(productId, showModal = true) {
     const user = getCurrentUser();
     if (!user) {
-        alert('Please login to add items to cart');
-        window.location.href = 'login.html';
+        ModalService.showLoginModal('add-to-cart', productId);
         return;
     }
     
@@ -714,138 +1027,22 @@ async function addToCart(productId, showModal = true) {
         
         if (result.success) {
             if (showModal) {
-                showCartSuccessModal(result.message || 'Item added to cart!');
-            } else {
-                alert(result.message || 'Item added to cart!');
+                ModalService.showSuccessModal(
+                    'Item Added!',
+                    'Your item has been added to the shopping cart.',
+                    {
+                        showCartButton: true,
+                        autoClose: true,
+                        timeout: 3000
+                    }
+                );
             }
         } else {
-            alert(result.message || 'Failed to add to cart');
+            ModalService.showErrorModal('Failed to Add Item', result.message || 'Please try again.');
         }
     } catch (error) {
         console.error('Add to cart error:', error);
-        alert('Failed to add to cart. Please try again.');
-    }
-}
-
-function showCartSuccessModal(message) {
-    // Remove any existing modal first
-    const existingModal = document.getElementById('cartSuccessModal');
-    if (existingModal) {
-        existingModal.remove();
-    }
-    
-    // Create modal HTML
-    const modalHTML = `
-    <div id="cartSuccessModal" style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 2000;
-        animation: fadeIn 0.3s ease;
-    ">
-        <div style="
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: slideUp 0.3s ease;
-            border-top: 5px solid #4CAF50;
-        ">
-            <div style="margin-bottom: 20px;">
-                <div style="
-                    width: 80px;
-                    height: 80px;
-                    background: #4CAF50;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin: 0 auto 20px;
-                ">
-                    <span style="color: white; font-size: 40px;">✓</span>
-                </div>
-                <h3 style="margin: 0 0 10px 0; color: #333;">Success!</h3>
-                <p style="color: #666; margin-bottom: 25px;">${message}</p>
-            </div>
-            
-            <div style="display: flex; gap: 10px;">
-                <button onclick="closeCartSuccessModal()" style="
-                    flex: 1;
-                    padding: 12px;
-                    background: #f0f0f0;
-                    color: #333;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 16px;
-                    cursor: pointer;
-                    transition: background 0.3s;
-                " onmouseover="this.style.background='#e0e0e0'"
-                onmouseout="this.style.background='#f0f0f0'">
-                    Continue Shopping
-                </button>
-                
-                <button onclick="window.location.href='cart.html'" style="
-                    flex: 1;
-                    padding: 12px;
-                    background: #333;
-                    color: white;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 16px;
-                    cursor: pointer;
-                    font-weight: bold;
-                    transition: background 0.3s;
-                " onmouseover="this.style.background='#555'"
-                onmouseout="this.style.background='#333'">
-                    🛒 View Cart
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Auto-close after 5 seconds
-    setTimeout(() => {
-        closeCartSuccessModal();
-    }, 5000);
-}
-
-function closeCartSuccessModal() {
-    const modal = document.getElementById('cartSuccessModal');
-    if (modal) {
-        modal.style.animation = 'fadeOut 0.3s ease';
-        setTimeout(() => {
-            modal.remove();
-        }, 300);
+        ModalService.showErrorModal('Error', 'Failed to add to cart. Please try again.');
     }
 }
 
@@ -855,8 +1052,7 @@ async function handleSellItem(e) {
     
     const user = getCurrentUser();
     if (!user) {
-        alert('Please login to sell items');
-        window.location.href = 'login.html';
+        ModalService.showLoginModal('sell');
         return;
     }
     
@@ -869,7 +1065,7 @@ async function handleSellItem(e) {
     
     // Validate
     if (!itemName || !category || !condition || !price || !description || !imageFile) {
-        alert('Please fill all required fields and upload an image');
+        ModalService.showErrorModal('Missing Information', 'Please fill all required fields and upload an image.');
         return;
     }
     
@@ -892,14 +1088,14 @@ async function handleSellItem(e) {
         const result = await response.json();
         
         if (result.success) {
-            alert(result.message || 'Item posted successfully!');
+            ModalService.showSuccessModal('Item Posted!', 'Your item is now live on USM E-Mart.');
             window.location.href = 'index.html';
         } else {
-            alert(result.message || 'Failed to post item');
+            ModalService.showErrorModal('Failed to Post Item', result.message || 'Please try again.');
         }
     } catch (error) {
         console.error('Sell item error:', error);
-        alert('Failed to post item. Please try again.');
+        ModalService.showErrorModal('Error', 'Failed to post item. Please try again.');
     }
 }
 
@@ -983,11 +1179,11 @@ async function updateCartQuantity(productId, newQuantity) {
         if (result.success) {
             loadCart();
         } else {
-            alert(result.message || 'Failed to update quantity');
+            ModalService.showErrorModal('Update Failed', result.message || 'Failed to update quantity.');
         }
     } catch (error) {
         console.error('Update cart quantity error:', error);
-        alert('Failed to update quantity');
+        ModalService.showErrorModal('Error', 'Failed to update quantity.');
     }
 }
 
@@ -997,26 +1193,25 @@ async function removeFromCart(productId) {
         if (result.success) {
             loadCart();
         } else {
-            alert(result.message || 'Failed to remove item');
+            ModalService.showErrorModal('Remove Failed', result.message || 'Failed to remove item.');
         }
     } catch (error) {
         console.error('Remove from cart error:', error);
-        alert('Failed to remove item');
+        ModalService.showErrorModal('Error', 'Failed to remove item.');
     }
 }
 
 async function handleCheckout() {
     const user = getCurrentUser();
     if (!user) {
-        alert('Please login to checkout');
-        window.location.href = 'login.html';
+        ModalService.showLoginModal('checkout');
         return;
     }
     
     try {
         const cart = await ApiService.getCart();
         if (cart.length === 0) {
-            alert('Your cart is empty');
+            ModalService.showErrorModal('Empty Cart', 'Your cart is empty. Add some items first!');
             return;
         }
         
@@ -1038,14 +1233,29 @@ async function handleCheckout() {
         const result = await ApiService.createOrder(orderData);
         
         if (result.success) {
-            alert(`Order placed successfully!\nOrder ID: ${result.orderId}\nTotal: RM${total.toFixed(2)}`);
-            window.location.href = 'index.html';
+            ModalService.showSuccessModal(
+                'Order Placed!',
+                `Thank you for your purchase!<br><br>
+                 Order ID: ${result.orderId}<br>
+                 Total: RM${total.toFixed(2)}<br><br>
+                 You will be redirected to home page.`,
+                {
+                    showCartButton: false,
+                    autoClose: false,
+                    timeout: 5000
+                }
+            );
+            
+            // Redirect after 5 seconds
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 5000);
         } else {
-            alert(result.message || 'Failed to place order');
+            ModalService.showErrorModal('Order Failed', result.message || 'Failed to place order.');
         }
     } catch (error) {
         console.error('Checkout error:', error);
-        alert('Failed to place order. Please try again.');
+        ModalService.showErrorModal('Error', 'Failed to place order. Please try again.');
     }
 }
 
@@ -1150,7 +1360,6 @@ async function loadAdminProducts() {
     }
 }
 
-
 async function loadAdminUsers() {
     try {
         const users = await ApiService.getAdminUsers();
@@ -1177,19 +1386,18 @@ async function loadAdminUsers() {
     }
 }
 
-
 async function updateOrderStatus(orderId, status) {
     try {
         const result = await ApiService.updateOrderStatus(orderId, status);
         if (result.success) {
-            alert(`Order ${orderId} marked as ${status}`);
+            ModalService.showSuccessModal('Order Updated', `Order ${orderId} marked as ${status}`);
             loadAdminOrders();
         } else {
-            alert(result.message || 'Failed to update order');
+            ModalService.showErrorModal('Update Failed', result.message || 'Failed to update order.');
         }
     } catch (error) {
         console.error('Update order status error:', error);
-        alert('Failed to update order');
+        ModalService.showErrorModal('Error', 'Failed to update order.');
     }
 }
 
@@ -1197,14 +1405,14 @@ async function removeProduct(productId) {
     try {
         const result = await ApiService.deleteProduct(productId);
         if (result.success) {
-            alert('Product removed');
+            ModalService.showSuccessModal('Product Removed', 'Product has been removed from the marketplace.');
             loadAdminProducts();
         } else {
-            alert(result.message || 'Failed to remove product');
+            ModalService.showErrorModal('Remove Failed', result.message || 'Failed to remove product.');
         }
     } catch (error) {
         console.error('Remove product error:', error);
-        alert('Failed to remove product');
+        ModalService.showErrorModal('Error', 'Failed to remove product.');
     }
 }
 
@@ -1218,7 +1426,6 @@ if (isAdminPage()) {
     document.addEventListener('DOMContentLoaded', loadAdminPanel);
 }
 
-// Add to end of app.js
 // ========== TAB SWITCHING ==========
 function switchTab(tabName) {
     // Hide all tabs
