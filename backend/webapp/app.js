@@ -415,14 +415,19 @@ async function loadProducts(category = null) {
     productGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 50px;">Loading products...</div>';
     
     try {
-        const products = await ApiService.getProducts(category);
+        // Get search query from input field
+        const searchInput = document.querySelector('.searchInput');
+        const searchQuery = searchInput ? searchInput.value.trim() : '';
+        
+        // Pass BOTH category and search query to ApiService
+        const products = await ApiService.getProducts(category, searchQuery);
         console.log("Products received:", products);
         
         if (!products || products.length === 0) {
             productGrid.innerHTML = `
                 <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
-                    <h3>No products available</h3>
-                    <p>Be the first to sell something!</p>
+                    <h3>No products found</h3>
+                    <p>${searchQuery ? 'Try a different search term or ' : ''}category</p>
                     <button class="sell" onclick="window.location.href='sell.html'">
                         SELL ITEM
                     </button>
