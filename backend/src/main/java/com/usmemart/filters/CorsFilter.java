@@ -1,7 +1,7 @@
 package com.usmemart.filters;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
 import java.io.IOException;
 
 public class CorsFilter implements Filter {
