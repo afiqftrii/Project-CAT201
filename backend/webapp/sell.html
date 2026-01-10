@@ -58,9 +58,10 @@
             </div>
             
             <div class="form-group">
-                <label for="imageUrl">Image URL</label>
-                <input type="text" id="imageUrl" placeholder="e.g., pic/yourimage.jpg">
-                <small>For demo, use images from pic/ folder</small>
+                <label for="imageUpload">Product Image *</label>
+                <input type="file" id="imageUpload" accept="image/*" required>
+                <small>Upload product image (JPG, PNG, GIF)</small>
+                <div id="imagePreview" style="margin-top: 10px;"></div>
             </div>
             
             <button type="submit" class="submit-btn">Post Item for Sale</button>
