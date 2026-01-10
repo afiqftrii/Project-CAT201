@@ -701,7 +701,7 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-async function addToCart(productId) {
+async function addToCart(productId, showModal = true) {
     const user = getCurrentUser();
     if (!user) {
         alert('Please login to add items to cart');
@@ -713,13 +713,139 @@ async function addToCart(productId) {
         const result = await ApiService.addToCart(productId);
         
         if (result.success) {
-            alert(result.message || 'Item added to cart!');
+            if (showModal) {
+                showCartSuccessModal(result.message || 'Item added to cart!');
+            } else {
+                alert(result.message || 'Item added to cart!');
+            }
         } else {
             alert(result.message || 'Failed to add to cart');
         }
     } catch (error) {
         console.error('Add to cart error:', error);
         alert('Failed to add to cart. Please try again.');
+    }
+}
+
+function showCartSuccessModal(message) {
+    // Remove any existing modal first
+    const existingModal = document.getElementById('cartSuccessModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal HTML
+    const modalHTML = `
+    <div id="cartSuccessModal" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        animation: fadeIn 0.3s ease;
+    ">
+        <div style="
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+            border-top: 5px solid #4CAF50;
+        ">
+            <div style="margin-bottom: 20px;">
+                <div style="
+                    width: 80px;
+                    height: 80px;
+                    background: #4CAF50;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 20px;
+                ">
+                    <span style="color: white; font-size: 40px;">✓</span>
+                </div>
+                <h3 style="margin: 0 0 10px 0; color: #333;">Success!</h3>
+                <p style="color: #666; margin-bottom: 25px;">${message}</p>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button onclick="closeCartSuccessModal()" style="
+                    flex: 1;
+                    padding: 12px;
+                    background: #f0f0f0;
+                    color: #333;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    transition: background 0.3s;
+                " onmouseover="this.style.background='#e0e0e0'"
+                onmouseout="this.style.background='#f0f0f0'">
+                    Continue Shopping
+                </button>
+                
+                <button onclick="window.location.href='cart.html'" style="
+                    flex: 1;
+                    padding: 12px;
+                    background: #333;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: background 0.3s;
+                " onmouseover="this.style.background='#555'"
+                onmouseout="this.style.background='#333'">
+                    🛒 View Cart
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Auto-close after 5 seconds
+    setTimeout(() => {
+        closeCartSuccessModal();
+    }, 5000);
+}
+
+function closeCartSuccessModal() {
+    const modal = document.getElementById('cartSuccessModal');
+    if (modal) {
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
     }
 }
 
