@@ -1,6 +1,6 @@
-// api-service.js
-const API_BASE_URL = 'http://localhost:8080/shusm-emart/api';
+// api-service.js - CORRECTED VERSION
 
+const API_BASE_URL = 'http://localhost:8080/usm-emart/api';
 const ApiService = {
     // ========== AUTHENTICATION ==========
     async login(email, password) {
@@ -41,8 +41,11 @@ const ApiService = {
             
             if (params.toString()) url += '?' + params.toString();
             
+            console.log('Fetching products from:', url);
             const response = await fetch(url);
-            return await response.json();
+            const products = await response.json();
+            console.log('Products received:', products);
+            return products;
         } catch (error) {
             console.error('Get products API error:', error);
             return [];
@@ -51,8 +54,12 @@ const ApiService = {
 
     async getProductById(productId) {
         try {
+            console.log('Fetching product:', productId);
             const response = await fetch(`${API_BASE_URL}/products/${productId}`);
-            if (!response.ok) throw new Error('Product not found');
+            if (!response.ok) {
+                console.error('Product not found:', productId);
+                return null;
+            }
             return await response.json();
         } catch (error) {
             console.error('Get product API error:', error);
@@ -78,11 +85,17 @@ const ApiService = {
     // ========== CART ==========
     async getCart() {
         try {
+            console.log('Fetching cart...');
             const response = await fetch(`${API_BASE_URL}/cart/`, {
                 credentials: 'include'
             });
-            if (response.status === 401) return [];
-            return await response.json();
+            if (response.status === 401) {
+                console.log('User not logged in for cart');
+                return [];
+            }
+            const cart = await response.json();
+            console.log('Cart received:', cart);
+            return cart;
         } catch (error) {
             console.error('Get cart API error:', error);
             return [];
@@ -91,13 +104,15 @@ const ApiService = {
 
     async addToCart(productId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/cart/add`, {
+            const response = await fetch(`${API_BASE_URL}/cart/`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ productId }),
                 credentials: 'include'
             });
-            return await response.json();
+            const result = await response.json();
+            console.log('Add to cart result:', result);
+            return result;
         } catch (error) {
             console.error('Add to cart API error:', error);
             return { success: false, message: 'Failed to add to cart' };
@@ -106,7 +121,7 @@ const ApiService = {
 
     async updateCartItem(productId, quantity) {
         try {
-            const response = await fetch(`${API_BASE_URL}/cart/update`, {
+            const response = await fetch(`${API_BASE_URL}/cart/`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ productId, quantity }),
@@ -121,7 +136,7 @@ const ApiService = {
 
     async removeFromCart(productId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/cart/remove?productId=${productId}`, {
+            const response = await fetch(`${API_BASE_URL}/cart/?productId=${productId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
