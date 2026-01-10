@@ -280,6 +280,28 @@ function setupEventListeners() {
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', handleCheckout);
     }
+
+    const imageUpload = document.getElementById('imageUpload');
+if (imageUpload) {
+    imageUpload.addEventListener('change', function() {
+        const preview = document.getElementById('imagePreview');
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.innerHTML = `
+                    <img src="${e.target.result}" 
+                         style="max-width: 200px; max-height: 200px; border-radius: 5px; margin-top: 10px;">
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                        Image preview (${Math.round(imageUpload.files[0].size / 1024)} KB)
+                    </p>
+                `;
+            }
+            
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+}
 }
 
 // ========== USER MANAGEMENT ==========
@@ -717,20 +739,31 @@ async function handleSellItem(e) {
     const condition = document.getElementById('condition').value;
     const price = parseFloat(document.getElementById('price').value);
     const description = document.getElementById('description').value;
-    const imageUrl = document.getElementById('imageUrl').value || 'pic/default-item.jpg';
+    const imageFile = document.getElementById('imageUpload').files[0];
     
-    const productData = {
-        name: itemName,
-        price: price,
-        category: category,
-        seller: user.username,
-        condition: condition,
-        image: imageUrl,
-        description: description
-    };
+    // Validate
+    if (!itemName || !category || !condition || !price || !description || !imageFile) {
+        alert('Please fill all required fields and upload an image');
+        return;
+    }
+    
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append('name', itemName);
+    formData.append('category', category);
+    formData.append('condition', condition);
+    formData.append('price', price);
+    formData.append('description', description);
+    formData.append('image', imageFile);
     
     try {
-        const result = await ApiService.createProduct(productData);
+        const response = await fetch('http://localhost:8080/usm-emart/api/products', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+        
+        const result = await response.json();
         
         if (result.success) {
             alert(result.message || 'Item posted successfully!');
