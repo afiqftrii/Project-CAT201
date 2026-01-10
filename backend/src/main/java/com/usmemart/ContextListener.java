@@ -1,7 +1,7 @@
 package com.usmemart;
 
-import jakarta.servlet.*;
-import jakarta.servlet.annotation.*;
+import javax.servlet.*;
+import javax.servlet.annotation.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
