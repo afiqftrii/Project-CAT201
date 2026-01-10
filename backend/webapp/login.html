@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>Login - USM E-Mart</title>
+</head>
+<body>
+    <nav class="navTop">
+        <div class="navItem">
+            <p class="name">USM E-Mart</p>
+        </div>
+        <div class="navItem">
+            <a href="index.html" style="color: white; text-decoration: none;">Back to Home</a>
+        </div>
+    </nav>
+    
+    <div class="login-container">
+        <h2>Student Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="admin@usm.my" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" placeholder="admin123" required>
+            </div>
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+            <h3>New Student? Register Here</h3>
+            <form id="registerForm" style="margin-top: 15px;">
+                <div class="form-group">
+                    <input type="text" id="regUsername" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="regEmail" placeholder="Email (usm.my)" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="regPassword" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="regMatric" placeholder="Matric Number" required>
+                </div>
+                <button type="submit" class="submit-btn" style="background-color: #28a745;">Register</button>
+            </form>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <p>Demo accounts:</p>
+            <p><strong>Admin:</strong> admin@usm.my / admin123</p>
+            <p><strong>Student:</strong> student@usm.my / student123</p>
+        </div>
+    </div>
+    
+    <script src="api-service.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Add registration handler
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const userData = {
+                username: document.getElementById('regUsername').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                matric: document.getElementById('regMatric').value
+            };
+            
+            try {
+                const response = await fetch('http://localhost:8080/usm-emart/api/users', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(userData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('Registration successful! Please login.');
+                    // Clear form
+                    document.getElementById('registerForm').reset();
+                } else {
+                    alert('Registration failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Registration failed. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

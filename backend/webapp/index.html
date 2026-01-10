@@ -1,0 +1,81 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>USM E-Mart</title>
+</head>
+<body>
+    <nav class="navTop">
+        <div class="navItem">
+            <p class="name">
+                USM E-Mart
+            </p>
+        </div>
+        <div class="navItem">
+           <div class="search">
+                <input type="text" placeholder="Search..." class="searchInput">
+                <img src="./pic/searchicon4.png" width="20" height="20" alt="" class="searchIcon"/>
+            </div>
+        </div>
+        <div class="buttons">
+            <button class="sell">
+                SELL
+                <img class="plusicon" src="pic/plus4.png" />
+            </button> 
+            <button class="Cart">
+                CART
+                <img class="carticon" src="pic/cart4.png" />
+            </button>
+        </div>
+    </nav>
+    <nav class="navBot">
+        <button class="allproduct">
+            All Product
+        </button>
+        <button class="clothes">
+            Clothes
+        </button>
+        <button class="home">
+            Home Appliances
+        </button>
+        <button class="electronics">
+            Electronics
+        </button>
+        <button class="education">
+            Education
+        </button>
+    </nav>
+    
+    <!-- ONLY THIS DIV - Should be COMPLETELY empty -->
+    <div class="productGrid">
+        <!-- Products will be loaded dynamically by JavaScript -->
+    </div>
+    
+    <div class="barBot">
+        <h3>
+            About Us
+        </h3>
+        <p class="about">
+            Front-End Designer : 
+        </p>
+        <p class="about2">
+            Afiq Fitri
+        </p>
+        <P class="about">
+            Back-End Developer : 
+        </P>
+        <P class="about2">
+            Raja Adam
+        </P>
+        <P class="about2">
+            Hanafi
+        </P>
+        <p class="about2">
+            Qaid Mubasyir
+        </p>
+    </div>
+    <script src="api-service.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

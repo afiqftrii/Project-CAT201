@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>Sell Item - USM E-Mart</title>
+</head>
+<body>
+    <nav class="navTop">
+        <div class="navItem">
+            <p class="name">USM E-Mart</p>
+        </div>
+        <div class="navItem">
+            <a href="index.html" style="color: white; text-decoration: none;">← Back to Home</a>
+        </div>
+    </nav>
+    
+    <div class="sell-container">
+        <h2>Sell Your Item</h2>
+        <form id="sellForm">
+            <div class="form-group">
+                <label for="itemName">Item Name *</label>
+                <input type="text" id="itemName" placeholder="e.g., Nike Shoes, Calculator, etc." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select id="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Clothes">Clothes</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Home Appliances">Home Appliances</option>
+                    <option value="Education">Education</option>
+                    <option value="Others">Others</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="condition">Condition *</label>
+                <select id="condition" required>
+                    <option value="">Select Condition</option>
+                    <option value="New">New</option>
+                    <option value="Used: Like New">Used: Like New</option>
+                    <option value="Used: Good">Used: Good</option>
+                    <option value="Used: Poor">Used: Poor</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="price">Price (RM) *</label>
+                <input type="number" id="price" step="0.01" min="0" placeholder="e.g., 50.00" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" placeholder="Describe your item in detail..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="imageUrl">Image URL</label>
+                <input type="text" id="imageUrl" placeholder="e.g., pic/yourimage.jpg">
+                <small>For demo, use images from pic/ folder</small>
+            </div>
+            
+            <button type="submit" class="submit-btn">Post Item for Sale</button>
+        </form>
+        
+        <a href="index.html" style="display: inline-block; margin-top: 20px; color: #333; text-decoration: none;">← Cancel and return to Home</a>
+    </div>
+    <script src="api-service.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

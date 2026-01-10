@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>Your Cart - USM E-Mart</title>
+</head>
+<body>
+    <nav class="navTop">
+        <div class="navItem">
+            <p class="name">USM E-Mart</p>
+        </div>
+        <div class="navItem">
+            <a href="index.html" style="color: white; text-decoration: none;">← Back to Shopping</a>
+        </div>
+    </nav>
+    
+    <div class="cart-container">
+        <h2 class="cart-title">Your Shopping Cart</h2>
+        
+        <div id="cartContent">
+            <!-- Cart items will be loaded here -->
+        </div>
+        
+        <div class="cart-summary" id="cartSummary" style="display: none;">
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="subtotal">RM 0.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Platform Fee (2%)</span>
+                <span id="fee">RM 0.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Estimated Shipping</span>
+                <span>FREE</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total</span>
+                <span id="total">RM 0.00</span>
+            </div>
+            
+            <button class="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </div>
+    <script src="api-service.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

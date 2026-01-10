@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>Admin Panel - USM E-Mart</title>
+</head>
+<body>
+    <nav class="navTop">
+        <div class="navItem">
+            <p class="name">USM E-Mart - Admin Panel</p>
+        </div>
+        <div class="navItem">
+            <button onclick="logout()" style="background: #555; color: white; border: none; padding: 10px 15px; border-radius: 3px; cursor: pointer;">
+                Logout
+            </button>
+            <a href="index.html" style="color: white; text-decoration: none; margin-left: 20px;">← Back to Home</a>
+        </div>
+    </nav>
+    
+    <div class="admin-container">
+        <h2 class="admin-title">Admin Dashboard</h2>
+        
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalProducts">0</div>
+                <div class="stat-label">Total Products</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalOrders">0</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalRevenue">RM 0.00</div>
+                <div class="stat-label">Total Revenue</div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="switchTab('orders')">Orders</button>
+            <button class="tab-btn" onclick="switchTab('products')">Products</button>
+            <button class="tab-btn" onclick="switchTab('users')">Users</button>
+        </div>
+        
+        <!-- Orders Tab -->
+        <div id="ordersTab" class="tab-content active">
+            <h3>Manage Orders</h3>
+            <table id="ordersTable">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Buyer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Orders will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Products Tab -->
+        <div id="productsTab" class="tab-content">
+            <h3>Manage Products</h3>
+            <table id="productsTable">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Seller</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Products will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Users Tab -->
+        <div id="usersTab" class="tab-content">
+            <h3>Manage Users</h3>
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Matric No</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Users will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="api-service.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
