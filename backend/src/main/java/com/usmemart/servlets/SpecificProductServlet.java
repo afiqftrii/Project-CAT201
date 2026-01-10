@@ -3,13 +3,13 @@ package com.usmemart.servlets;
 import com.usmemart.Product;
 import com.usmemart.DataManager;
 import com.google.gson.Gson;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.annotation.*;
 import java.io.*;
 import java.util.List;
 
-
+@WebServlet("/api/products/*")
 public class SpecificProductServlet extends HttpServlet {
     private Gson gson = new Gson();
     
