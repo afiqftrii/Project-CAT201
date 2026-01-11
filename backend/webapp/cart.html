@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/891/891419.png" type="image/png">
@@ -11,27 +11,27 @@
 </head>
 <body>
     <nav class="navTop">
-    <!-- Left: Logo and Name -->
-    <div class="nav-left">
-        <div class="logo-container">
-            <div class="logo-circle">
-                <i class="fas fa-shopping-bag logo-icon"></i>
+        <!-- Left: Logo and Name -->
+        <div class="nav-left">
+            <div class="logo-container">
+                <div class="logo-circle">
+                    <i class="fas fa-shopping-bag logo-icon"></i>
+                </div>
+                <p class="name">USM E-Mart</p>
             </div>
-            <p class="name">
-                    USM E-Mart - Shopping Cart
-            </p>
         </div>
-    </div>
-    
-    <!-- Center: Search Bar (empty on non-home pages or add different content) -->
-    <div class="nav-center">
-        <!-- Can be empty or contain page-specific content -->
-    </div>
-    
-    <!-- Right: Page-specific buttons -->
-    <div class="buttons">
-        <!-- Page-specific buttons here -->
-    </div>
+        
+        <!-- Center: Search Bar (empty on non-home pages) -->
+        <div class="nav-center">
+            <!-- Can be empty or contain page-specific content -->
+        </div>
+        
+        <!-- Right: Back button -->
+        <div class="buttons">
+            <a href="index.html" class="back-button" style="color: white; text-decoration: none;">
+                ← Back to Shopping
+            </a>
+        </div>
     </nav>
     
     <div class="cart-container">
@@ -58,10 +58,10 @@
                 <span>Total</span>
                 <span id="total">RM 0.00</span>
             </div>
-            
-            <button class="checkout-btn">Proceed to Checkout</button>
+            <button class="checkout-btn" onclick="goToCheckout()">Proceed to Checkout</button>
         </div>
     </div>
+    
     <script src="api-service.js"></script>
     <script src="app.js"></script>
 </body>
