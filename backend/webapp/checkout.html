@@ -1,0 +1,366 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/891/891419.png" type="image/png">
+    <title>Checkout - USM E-Mart</title>
+</head>
+<body>
+    <nav class="navTop">
+        <div class="nav-left">
+            <div class="logo-container">
+                <div class="logo-circle">
+                    <i class="fas fa-shopping-bag logo-icon"></i>
+                </div>
+                <p class="name">
+                    USM E-Mart - Checkout
+                </p>
+            </div>
+        </div>
+        <div class="nav-center"></div>
+        <div class="nav-right">
+            <a href="index.html" class="home-btn">
+                <i class="fas fa-home"></i>
+                <span>HOME</span>
+            </a>
+        </div>
+    </nav>
+    
+    <div class="checkout-container">
+        <div class="checkout-steps">
+            <div class="step active">1. Cart</div>
+            <div class="step active">2. Information</div>
+            <div class="step">3. Payment</div>
+            <div class="step">4. Confirm</div>
+        </div>
+        
+        <div class="checkout-content">
+            <div class="order-summary-section">
+                <h3>Order Summary</h3>
+                <div id="orderSummary">
+                    <!-- Order summary will be loaded here -->
+                    <div class="loading-orders">
+                        <div class="loading-spinner"></div>
+                        <p>Loading your order...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="checkout-form-section">
+                <h3>Delivery Information</h3>
+                <form id="checkoutForm">
+                    <div class="form-group">
+                        <label for="fullName">Full Name *</label>
+                        <input type="text" id="fullName" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="matricNumber">Matric Number *</label>
+                        <input type="text" id="matricNumber" placeholder="e.g., 22304500" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number *</label>
+                        <input type="tel" id="phoneNumber" placeholder="e.g., 012-3456789" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="campus">Campus Location *</label>
+                        <select id="campus" required>
+                            <option value="">Select Campus</option>
+                            <option value="Main Campus">Main Campus</option>
+                            <option value="Engineering Campus">Engineering Campus</option>
+                            <option value="Health Campus">Health Campus</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pickupLocation">Pickup Location *</label>
+                        <input type="text" id="pickupLocation" placeholder="e.g., Kampus Seberang Perai, Cafeteria" required>
+                    </div>
+                    
+                    <h3 style="margin-top: 30px;">Payment Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="paymentMethod">Payment Method *</label>
+                        <select id="paymentMethod" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="card">Credit/Debit Card</option>
+                            <option value="cash">Cash on Pickup</option>
+                        </select>
+                    </div>
+                    
+                    <div id="cardDetails" style="display: none;">
+                        <div class="form-group">
+                            <label for="cardNumber">Card Number *</label>
+                            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="expiryDate">Expiry Date *</label>
+                                <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
+                            </div>
+                            
+                            <div class="form-group" style="flex: 1;">
+                                <label for="cvv">CVV *</label>
+                                <input type="text" id="cvv" placeholder="123" maxlength="3">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="terms">
+                        <input type="checkbox" id="agreeTerms" required>
+                        <label for="agreeTerms">
+                            I agree to the <a href="#" style="color: #333;">Terms & Conditions</a> and 
+                            understand this is a student-to-student marketplace.
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" style="margin-top: 20px;">
+                        Proceed to Payment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="api-service.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Check if user is logged in when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Get current user from localStorage
+            const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            
+            if (!user) {
+                // User not logged in, redirect to login
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Load order summary
+            await loadOrderSummary();
+            
+            // Pre-fill matric number if available from user profile
+            try {
+                const userProfile = await ApiService.getUserProfile();
+                if (userProfile && userProfile.matric) {
+                    document.getElementById('matricNumber').value = userProfile.matric;
+                }
+            } catch (error) {
+                console.log('Could not load user profile:', error);
+            }
+            
+            // Setup formatters
+            setupFormatters();
+        });
+        
+        function setupFormatters() {
+            // Show/hide card details based on payment method
+            document.getElementById('paymentMethod').addEventListener('change', function() {
+                const cardDetails = document.getElementById('cardDetails');
+                if (this.value === 'card') {
+                    cardDetails.style.display = 'block';
+                    
+                    // Make card fields required
+                    document.getElementById('cardNumber').required = true;
+                    document.getElementById('expiryDate').required = true;
+                    document.getElementById('cvv').required = true;
+                } else {
+                    cardDetails.style.display = 'none';
+                    
+                    // Make card fields not required
+                    document.getElementById('cardNumber').required = false;
+                    document.getElementById('expiryDate').required = false;
+                    document.getElementById('cvv').required = false;
+                }
+            });
+            
+            // Format card number
+            document.getElementById('cardNumber')?.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                let formatted = value.replace(/(\d{4})/g, '$1 ').trim();
+                e.target.value = formatted.substring(0, 19);
+            });
+            
+            // Format expiry date
+            document.getElementById('expiryDate')?.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                e.target.value = value.substring(0, 5);
+            });
+            
+            // Only allow numbers for CVV
+            document.getElementById('cvv')?.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
+            });
+        }
+        
+        // Handle checkout form submission
+        document.getElementById('checkoutForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get cart data
+            const cart = await ApiService.getCart();
+            console.log('Cart items for checkout:', cart);
+            
+            if (cart.length === 0) {
+                ModalService.showErrorModal('Empty Cart', 'Your cart is empty! Please add items before checking out.');
+                return;
+            }
+            
+            // Calculate totals
+            let subtotal = 0;
+            cart.forEach(item => {
+                subtotal += item.price * item.quantity;
+            });
+            const fee = subtotal * 0.02;
+            const total = subtotal + fee;
+            
+            // Create order data
+            const orderData = {
+                items: cart,
+                subtotal: subtotal,
+                fee: fee,
+                total: total,
+                shippingInfo: {
+                    fullName: document.getElementById('fullName').value,
+                    matricNumber: document.getElementById('matricNumber').value,
+                    phoneNumber: document.getElementById('phoneNumber').value,
+                    campus: document.getElementById('campus').value,
+                    pickupLocation: document.getElementById('pickupLocation').value,
+                    paymentMethod: document.getElementById('paymentMethod').value
+                }
+            };
+            
+            // If card payment, add card info (just for show, not real)
+            if (document.getElementById('paymentMethod').value === 'card') {
+                orderData.shippingInfo.cardLast4 = document.getElementById('cardNumber').value.slice(-4);
+            }
+            
+            // Show loading
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Processing...';
+            submitBtn.disabled = true;
+            
+            try {
+                const result = await ApiService.createOrder(orderData);
+                
+                if (result.success) {
+                    // Store order info for confirmation page
+                    localStorage.setItem('lastOrder', JSON.stringify({
+                        orderId: result.orderId || 'ORD' + Date.now(),
+                        total: total,
+                        shippingInfo: orderData.shippingInfo,
+                        items: cart
+                    }));
+                    
+                    // Show success message and redirect
+                    ModalService.showSuccessModal(
+                        'Order Placed!',
+                        'Your order has been successfully placed. You will be redirected to the confirmation page.',
+                        {
+                            showCartButton: false,
+                            autoClose: true,
+                            timeout: 2000
+                        }
+                    );
+                    
+                    // Redirect after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = 'order-confirmation.html';
+                    }, 2000);
+                    
+                } else {
+                    ModalService.showErrorModal('Order Failed', result.message || 'Failed to place order.');
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Checkout error:', error);
+                ModalService.showErrorModal('Error', 'Failed to place order. Please try again.');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        async function loadOrderSummary() {
+            try {
+                const cart = await ApiService.getCart();
+                const summaryDiv = document.getElementById('orderSummary');
+                
+                if (cart.length === 0) {
+                    summaryDiv.innerHTML = `
+                        <div class="empty-cart">
+                            <h3>Your cart is empty</h3>
+                            <p>Add some items to get started!</p>
+                            <a href="index.html" class="btn-continue">Continue Shopping</a>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let subtotal = 0;
+                let html = '<div class="summary-items">';
+                
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    subtotal += itemTotal;
+                    
+                    html += `
+                        <div class="summary-item">
+                            <div class="summary-item-name">${item.name} × ${item.quantity}</div>
+                            <div class="summary-item-price">RM ${itemTotal.toFixed(2)}</div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                
+                const fee = subtotal * 0.02;
+                const total = subtotal + fee;
+                
+                html += `
+                    <div class="summary-totals">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span>RM ${subtotal.toFixed(2)}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Platform Fee (2%)</span>
+                            <span>RM ${fee.toFixed(2)}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span>FREE</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span>RM ${total.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+                
+                summaryDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading order summary:', error);
+                document.getElementById('orderSummary').innerHTML = `
+                    <div class="error-message">
+                        <p>Failed to load cart. Please try again.</p>
+                        <button onclick="loadOrderSummary()" class="btn-continue">Retry</button>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
