@@ -73,15 +73,27 @@ USM E-Mart is an e-commerce platform exclusively for USM students to buy and sel
 Version: Must be exactly Java 8 (1.8.0_xxx)
 Download: https://adoptium.net/temurin/releases/?version=8
 Verify: Run java -version and ensure output shows 1.8.0_xxx
+Edit the system environment variable
+Create new system variable
+Variable name: JAVA_HOME
+Variable value: Enter java installation location (e.g: C:\Program Files\Java\jdk-25)
 
 2.Apache Maven 3.9.12
 Download: https://maven.apache.org/download.cgi
 Verify: Run mvn -v and check version
 Purpose: Builds the project and manages dependencies
+Edit the system environment variable
+Create new system variable
+Variable name: MAVEN_HOME
+Variable value: Enter maven installation location (e.g: C:\apache-maven-3.9.12)
 
 3.Apache Tomcat 9.0.113
 Download: https://tomcat.apache.org/download-90.cgi
 Choose: apache-tomcat-9.0.113-windows-x64.zip (Windows)
+Edit the system environment variable
+Create new system variable
+Variable name: CATALINA_HOME
+Variable value: Enter tomcat installation location (e.g: C:\apache-tomcat-9.0.113)
 
 ### Setup
 1.Make sure to run this command in terminal to reset war file
@@ -94,7 +106,7 @@ mvn package
 
 3.Paste it in your Apache Program Files in webapps folder (e.g: C:\Users\AFIQFRII\Downloads\apache-tomcat-9.0.113\apache-tomcat-9.0.113\webapps)
 
-4.Start the tomcat server.
+4.Start the tomcat server (e.g:Run startup.bat in C:\apache-tomcat-9.0.113\bin)
 
 5.Go to Project-CAT201/backend/webapp and copy "admin.html","api-service.js","app.js","cart.html","index.html","login.html","sell.html","style.css","checkout.html", "order-confirmation.html", "checkout.html", "api-service.js" , and pic folder.
 
