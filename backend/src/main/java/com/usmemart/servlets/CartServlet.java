@@ -69,7 +69,7 @@ public class CartServlet extends HttpServlet {
             return;
         }
         
-        // Rest of the code remains the same...
+        
         // Get product details
         List<Product> products = DataManager.loadProducts();
         Product product = null;
