@@ -34,7 +34,7 @@ Purpose: Builds the project and manages dependencies
 Download: https://tomcat.apache.org/download-90.cgi
 Choose: apache-tomcat-9.0.113-windows-x64.zip (Windows)
 
-###Setup
+### Setup
 1.Make sure to run this in command in terminal to reset war file
 cd backend
 mvn clean
