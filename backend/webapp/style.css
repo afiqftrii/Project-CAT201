@@ -95,58 +95,160 @@ nav{
     height: 20px;
 }
 
-.navBot{
+/* ========== ENHANCED CATEGORY NAVIGATION ========== */
+.navBot {
     background-color: rgb(89, 78, 55);
+    padding: 10px 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
-.allproduct,.clothes,.home,.electronics,.education{
+.navBot button {
     background-color: rgb(89, 78, 55);
     font-weight: 900;
     font-size: 15px;
     color: white;
-    border: 0;
-    margin-right: 10px;
+    border: 2px solid transparent;
+    padding: 10px 20px;
+    border-radius: 25px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.allproduct:hover{
+.navBot button:hover {
     background-color: rgb(145, 133, 108);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-.clothes:hover{
-    background-color: rgb(145, 133, 108);
-}
-
-.home:hover{
-    background-color: rgb(145, 133, 108);
-}
-
-.electronics:hover{
-    background-color: rgb(145, 133, 108);
-}
-
-.education:hover{
-    background-color: rgb(145, 133, 108);
-}
-
-.allproduct:active{
+.navBot button:active {
     background-color: rgb(207, 190, 154);
+    transform: translateY(0);
 }
 
-.clothes:active{
-    background-color: rgb(207, 190, 154);
+/* Active category button */
+.navBot button.active-category {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: 2px solid white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    transform: translateY(-2px);
 }
 
-.home:active{
-    background-color: rgb(207, 190, 154);
+/* Ripple effect on click */
+.navBot button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
 }
 
-.electronics:active{
-    background-color: rgb(207, 190, 154);
+.navBot button:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
 }
 
-.education:active{
-    background-color: rgb(207, 190, 154);
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    20% {
+        transform: scale(25, 25);
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(40, 40);
+    }
+}
+
+/* Category counter badge */
+.navBot button .category-count {
+    display: inline-block;
+    background-color: #ff4444;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 5px;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Specific category colors */
+.navBot button.allproduct.active-category {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+.navBot button.clothes.active-category {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+}
+
+.navBot button.home.active-category {
+    background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+}
+
+.navBot button.electronics.active-category {
+    background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+}
+
+.navBot button.education.active-category {
+    background: linear-gradient(135deg, #009688 0%, #00796B 100%);
+}
+
+/* ========== RESPONSIVE CATEGORY NAV ========== */
+@media (max-width: 768px) {
+    .navBot {
+        justify-content: center;
+        padding: 8px 10px;
+        gap: 8px;
+    }
+    
+    .navBot button {
+        padding: 8px 15px;
+        font-size: 14px;
+        border-radius: 20px;
+    }
+    
+    .navBot button .category-count {
+        font-size: 10px;
+        padding: 1px 5px;
+        min-width: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navBot {
+        overflow-x: auto;
+        white-space: nowrap;
+        justify-content: flex-start;
+        padding: 8px;
+    }
+    
+    .navBot::-webkit-scrollbar {
+        height: 4px;
+    }
+    
+    .navBot::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.1);
+    }
+    
+    .navBot::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.3);
+        border-radius: 2px;
+    }
 }
 
 .productGrid{
@@ -167,6 +269,7 @@ nav{
     align-items: center;    
     justify-content: center;
     cursor: pointer;
+    animation: fadeIn 0.5s ease;
 }
 
 .productLayout:hover{
@@ -993,4 +1096,25 @@ tr:hover {
         transform: scale(1);
         opacity: 1;
     }
+}
+
+/* ========== LOADING ANIMATIONS ========== */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #333;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
 }
