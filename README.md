@@ -80,7 +80,7 @@ Download: https://tomcat.apache.org/download-90.cgi
 Choose: apache-tomcat-9.0.113-windows-x64.zip (Windows)
 
 ### Setup
-1.Make sure to run this in command in terminal to reset war file
+1.Make sure to run this command in terminal to reset war file
 cd backend
 mvn clean
 mvn compile
