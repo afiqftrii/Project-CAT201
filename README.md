@@ -3,6 +3,12 @@
 ## Project Description
 USM E-Mart is an e-commerce platform exclusively for USM students to buy and sell items within the campus community.
 
+## Team Members
+1. Muhammad Afiq Fitri bin Mohd Mazlan
+2. Muhammad Hanafi bin Zaharuddin
+3. Muhammad Qaid Mubasyir bin Yahya
+4. Raja Adam Haziq bin Raja Muhd Zulkhairi
+
 ## Features
 - Student registration and login
 - Browse items by category
@@ -16,6 +22,45 @@ USM E-Mart is an e-commerce platform exclusively for USM students to buy and sel
 - **Backend**: Java Servlets
 - **Build Tool**: Maven
 - **Server**: Apache Tomcat
+
+# Project Structure
+- USM-EMart/
+- ├── backend/
+- │   ├── src/main/java/com/usmemart/
+- │   │   ├── User.java
+- │   │   ├── Product.java
+- │   │   ├── Order.java
+- │   │   ├── CartItem.java
+- │   │   ├── DataManager.java 
+- │   │   ├── ContextListener.java
+- │   │   ├── servlets/
+- │   │   │   ├── LoginServlet.java
+- │   │   │   ├── ProductServlet.java
+- │   │   │   ├── CartServlet.java 
+- │   │   │   ├── OrderServlet.java 
+- │   │   │   ├── AdminServlet.java
+- │   │   │   ├── UserServlet.java
+- │   │   │   ├── SpecificProductServlet.java
+- │   │   │   └── LogoutServlet.java
+- │   │   └── filters/
+- │   │       └── CorsFilter.java
+- │   ├── src/main/webapp/
+- │   │   ├── index.html 
+- │   │   ├── login.html 
+- │   │   ├── sell.html
+- │   │   ├── cart.html
+- │   │   ├── admin.html
+- │   │   ├── style.css
+- │   │   ├── app.js 
+- │   │   ├── api-service.js 
+- │   │   ├── pic/ (images)
+- │   │   └── WEB-INF/web.xml
+- │   └── pom.xml
+- └── ~/usm-emart-data/ (created at runtime)
+-   ├── users.json (auto-generated)
+-   ├── products.json (auto-generated)
+-   ├── orders.json (auto-generated)
+-   └── carts/ (user cart files)
 
 ## Installation and Setup
 
