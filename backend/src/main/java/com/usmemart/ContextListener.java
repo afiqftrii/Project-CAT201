@@ -19,7 +19,7 @@ public class ContextListener implements ServletContextListener {
         List<Product> products = DataManager.loadProducts();
 System.out.println("Products loaded from file: " + products.size() + " products");
 
-// Always ensure we have at least the 12 default products
+
 if (products.size() < 12) {
     System.out.println("Initializing/refreshing default products...");
     List<Product> defaultProducts = createDefaultProducts();
@@ -55,7 +55,7 @@ if (products.size() < 12) {
     private List<Product> createDefaultProducts() {
     List<Product> products = new ArrayList<>();
     
-    // All 12 products from your frontend
+    
     products.add(new Product("1", "Nike Shoes", 123.99, "Clothes", 
         "Hanafi Zaharuddin", "Used: Like New", "pic/kasut1.jpg", 
         "High-quality Nike running shoes in excellent condition"));
