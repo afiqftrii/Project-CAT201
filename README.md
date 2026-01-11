@@ -70,7 +70,7 @@ USM E-Mart is an e-commerce platform exclusively for USM students to buy and sel
 
 ### Prerequisites
 1.Java Development Kit (JDK) 8
-Version: Must be exactly Java 8 (1.8.0_xxx)
+Version: Must be exactly Java 8 (Java 25 also can) (1.8.0_xxx)
 Download: https://adoptium.net/temurin/releases/?version=8
 Verify: Run java -version and ensure output shows 1.8.0_xxx
 Edit the system environment variable
