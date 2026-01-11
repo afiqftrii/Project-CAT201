@@ -1,4 +1,4 @@
-// api-service.js - CORRECTED VERSION
+
 
 const API_BASE_URL = 'http://localhost:8080/usm-emart/api';
 const ApiService = {
