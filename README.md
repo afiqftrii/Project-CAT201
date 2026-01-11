@@ -96,7 +96,7 @@ mvn package
 
 4.Start the tomcat server.
 
-5.Go to Project-CAT201/backend/webapp and copy "admin.html","api-service.js","app.js","cart.html","index.html","login.html","sell.html"."style.css" and pic folder.
+5.Go to Project-CAT201/backend/webapp and copy "admin.html","api-service.js","app.js","cart.html","index.html","login.html","sell.html","style.css","checkout.html", "order-confirmation.html", "checkout.html", "api-service.js" , and pic folder.
 
 6.Paste these files and folder in your Apache Program FIles in webapp folder (e.g: C:\Users\AFIQFRII\Downloads\apache-tomcat-9.0.113\apache-tomcat-9.0.113\webapps)
 
