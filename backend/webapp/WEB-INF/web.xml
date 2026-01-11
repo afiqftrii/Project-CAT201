@@ -48,7 +48,7 @@
         <location>/index.html</location>
     </error-page>
 
-    <!-- Add this to your web.xml -->
+  
 <servlet>
     <servlet-name>LoginServlet</servlet-name>
     <servlet-class>com.usmemart.servlets.LoginServlet</servlet-class>
