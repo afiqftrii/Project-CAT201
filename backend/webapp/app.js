@@ -1,6 +1,3 @@
-// USM E-Mart - Simple E-commerce
-// Data storage using localStorage
-
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
