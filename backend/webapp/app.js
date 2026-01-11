@@ -10,6 +10,9 @@ function initializeApp() {
     setupEventListeners();
     setupCategoryFilters();
     
+    // Always check login status first
+    checkLoginStatus();
+    
     if (isHomePage()) {
         // Set default active category to "All Product"
         setTimeout(() => {
@@ -18,10 +21,11 @@ function initializeApp() {
                 updateActiveCategory('All Product');
             }
             loadProducts();
+            
+            // Update product count
+            updateProductCount();
         }, 100);
     }
-    
-    checkLoginStatus();
 }
 
 // ========== PAGE DETECTION ==========
@@ -575,7 +579,10 @@ function updateActiveCategory(selectedCategory) {
 function setupEventListeners() {
     // SELL button - works on any page
     document.addEventListener('click', function(e) {
-        if (e.target.closest('.sell')) {
+        const sellBtn = e.target.closest('.sell');
+        const cartBtn = e.target.closest('.Cart');
+        
+        if (sellBtn) {
             e.preventDefault();
             const user = getCurrentUser();
             if (user) {
@@ -585,8 +592,7 @@ function setupEventListeners() {
             }
         }
         
-        // CART button - works on any page
-        if (e.target.closest('.Cart')) {
+        if (cartBtn) {
             e.preventDefault();
             const user = getCurrentUser();
             if (user) {
@@ -607,10 +613,10 @@ function setupEventListeners() {
         });
     }
     
-    // Search icon
-    const searchIcon = document.querySelector('.searchIcon');
-    if (searchIcon) {
-        searchIcon.addEventListener('click', function() {
+    // Search button
+    const searchBtn = document.querySelector('.search-btn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function() {
             const searchInput = document.querySelector('.searchInput');
             if (searchInput && searchInput.value) {
                 searchProducts(searchInput.value);
@@ -678,52 +684,115 @@ function getCurrentUser() {
 
 function updateUIForLoggedInUser(user) {
     const buttonsDiv = document.querySelector('.buttons');
-    if (buttonsDiv) {
+    if (!buttonsDiv) {
+        // For pages without .buttons div (like admin, cart), check nav-right
+        const navRight = document.querySelector('.nav-right');
+        if (navRight) {
+            // Admin/Cart page specific
+            return;
+        }
+        return;
+    }
+    
+    // Check if we're in the home page index.html
+    if (isHomePage()) {
         if (user) {
-            // User is logged in - show user info
+            // User is logged in - show user info and action buttons
             let adminButton = '';
             if (user.role === 'admin') {
                 adminButton = `
-                    <button class="admin-panel-btn" onclick="window.location.href='admin.html'">
+                    <a href="admin.html" style="
+                        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+                        color: white;
+                        border: none;
+                        padding: 10px 15px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        text-decoration: none;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 5px;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                    " onmouseover="this.style.background='linear-gradient(135deg, #ff5252 0%, #ff3838 100%)'"
+                    onmouseout="this.style.background='linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)'">
                         ⚙️ ADMIN
-                    </button>
+                    </a>
                 `;
             }
             
             buttonsDiv.innerHTML = `
                 ${adminButton}
                 <button class="sell">
-                    SELL
                     <img class="plusicon" src="pic/plus4.png" />
+                    SELL
                 </button>
                 <button class="Cart">
-                    CART
                     <img class="carticon" src="pic/cart4.png" />
+                    CART
                 </button>
-                <div class="user-info">
-                    <span style="color: white;">Hi, ${user.username}</span>
-                    <button onclick="logout()" style="margin-left: 10px; background: #555; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+                <div class="user-info" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 8px 15px;
+                    border-radius: 20px;
+                    margin-left: 10px;
+                ">
+                    <span style="color: white; font-weight: 500;">Hi, ${user.username}</span>
+                    <button onclick="logout()" style="
+                        background: rgba(255, 255, 255, 0.2);
+                        color: white;
+                        border: none;
+                        padding: 5px 10px;
+                        border-radius: 15px;
+                        cursor: pointer;
+                        font-size: 12px;
+                        transition: all 0.3s;
+                    " onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
                         Logout
                     </button>
                 </div>
             `;
         } else {
-            // User is NOT logged in - show login button
+            // User is NOT logged in - show login button with action buttons
             buttonsDiv.innerHTML = `
-                <button class="sell" onclick="window.location.href='login.html'">
-                    SELL
+                <button class="sell" onclick="ModalService.showLoginModal('sell')">
                     <img class="plusicon" src="pic/plus4.png" />
+                    SELL
                 </button>
-                <button class="Cart" onclick="window.location.href='login.html'">
-                    CART
+                <button class="Cart" onclick="ModalService.showLoginModal('view-cart')">
                     <img class="carticon" src="pic/cart4.png" />
+                    CART
                 </button>
                 <button onclick="window.location.href='login.html'" 
-                        style="background: #4CAF50; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                    LOGIN
+                        style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            border: none;
+                            padding: 12px 20px;
+                            border-radius: 30px;
+                            font-size: 16px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                            white-space: nowrap;
+                        " 
+                        onmouseover="this.style.background='linear-gradient(135deg, #764ba2 0%, #667eea 100%)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)'"
+                        onmouseout="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)'">
+                    🔐 LOGIN
                 </button>
             `;
         }
+        
+        // Re-attach event listeners for the buttons
+        setupEventListeners();
     }
 }
 
@@ -1810,4 +1879,327 @@ function switchTab(tabName) {
     // Show selected tab
     document.getElementById(tabName + 'Tab').classList.add('active');
     event.target.classList.add('active');
+}
+
+// Add new click handlers
+function handleSellClick() {
+    const user = getCurrentUser();
+    if (user) {
+        window.location.href = 'sell.html';
+    } else {
+        ModalService.showLoginModal('sell');
+    }
+}
+
+function handleCartClick() {
+    const user = getCurrentUser();
+    if (user) {
+        window.location.href = 'cart.html';
+    } else {
+        ModalService.showLoginModal('view-cart');
+    }
+}
+
+// Update the UI function for the new structure
+function updateUIForLoggedInUser(user) {
+    const authButtons = document.querySelector('.auth-buttons');
+    if (!authButtons) return;
+    
+    if (user) {
+        // User is logged in
+        let adminLink = '';
+        if (user.role === 'admin') {
+            adminLink = `
+                <a href="admin.html" class="admin-btn">
+                    ⚙️ ADMIN
+                </a>
+            `;
+        }
+        
+        authButtons.innerHTML = `
+            ${adminLink}
+            <div class="user-info">
+                <span>Hi, ${user.username}</span>
+                <button onclick="logout()">Logout</button>
+            </div>
+        `;
+    } else {
+        // User is NOT logged in
+        authButtons.innerHTML = `
+            <button class="login-btn" onclick="window.location.href='login.html'">
+                🔐 LOGIN
+            </button>
+        `;
+    }
+}
+
+// Update event listeners for search
+function setupEventListeners() {
+    // Search functionality
+    const searchInput = document.querySelector('.searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                searchProducts(this.value);
+            }
+        });
+    }
+    
+    // Search button using Font Awesome
+    const searchBtn = document.querySelector('.search-btn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function() {
+            const searchInput = document.querySelector('.searchInput');
+            if (searchInput && searchInput.value) {
+                searchProducts(searchInput.value);
+            }
+        });
+    }
+    
+    // Category filters
+    setupCategoryFilters();
+    
+    // Login form
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+    
+    // Sell form
+    const sellForm = document.getElementById('sellForm');
+    if (sellForm) {
+        sellForm.addEventListener('submit', handleSellItem);
+    }
+    
+    // Checkout button
+    const checkoutBtn = document.querySelector('.checkout-btn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', handleCheckout);
+    }
+    
+    // Image upload preview
+    const imageUpload = document.getElementById('imageUpload');
+    if (imageUpload) {
+        imageUpload.addEventListener('change', function() {
+            const preview = document.getElementById('imagePreview');
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" 
+                             style="max-width: 200px; max-height: 200px; border-radius: 5px; margin-top: 10px;">
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                            Image preview (${Math.round(imageUpload.files[0].size / 1024)} KB)
+                        </p>
+                    `;
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+}
+
+// Update cart badge function
+async function updateCartBadge() {
+    try {
+        const cart = await ApiService.getCart();
+        const cartCount = cart.length;
+        
+        // Create or update cart badge
+        let badge = document.querySelector('.cart-badge');
+        if (!badge && cartCount > 0) {
+            badge = document.createElement('span');
+            badge.className = 'cart-badge';
+            document.querySelector('.cart-btn').appendChild(badge);
+        }
+        
+        if (badge) {
+            if (cartCount > 0) {
+                badge.textContent = cartCount > 9 ? '9+' : cartCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Failed to update cart badge:', error);
+    }
+}
+
+// Icon fallback system
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if SVG icons loaded, fallback to images
+    setTimeout(() => {
+        // Check search icon
+        const searchIcon = document.querySelector('.search-icon');
+        const searchIconImg = document.querySelector('.search-icon-img');
+        if (searchIcon && searchIcon.clientHeight === 0) {
+            searchIcon.style.display = 'none';
+            if (searchIconImg) searchIconImg.style.display = 'block';
+        }
+        
+        // Check plus icon
+        const plusIcon = document.querySelector('.plus-icon');
+        const plusIconImg = document.querySelector('.plus-icon-img');
+        if (plusIcon && plusIcon.clientHeight === 0) {
+            plusIcon.style.display = 'none';
+            if (plusIconImg) plusIconImg.style.display = 'block';
+        }
+        
+        // Check cart icon
+        const cartIcon = document.querySelector('.cart-icon');
+        const cartIconImg = document.querySelector('.cart-icon-img');
+        if (cartIcon && cartIcon.clientHeight === 0) {
+            cartIcon.style.display = 'none';
+            if (cartIconImg) cartIconImg.style.display = 'block';
+        }
+    }, 1000);
+});
+
+// Add this function to handle admin user info display
+function updateAdminUserInfo() {
+    const user = getCurrentUser();
+    const userInfoDiv = document.getElementById('userInfoAdmin');
+    const logoutBtn = document.getElementById('logoutBtnAdmin');
+    
+    if (user && userInfoDiv) {
+        userInfoDiv.innerHTML = `
+            <div class="admin-user-details">
+                <span class="admin-email">${user.email}</span>
+                <span class="admin-role">(${user.role})</span>
+            </div>
+        `;
+    }
+    
+    // Always show logout button on admin page
+    if (logoutBtn) {
+        logoutBtn.style.display = 'flex';
+    }
+}
+
+// Update the loadAdminPanel function
+async function loadAdminPanel() {
+    console.log("loadAdminPanel() called");
+    
+    const user = getCurrentUser();
+    console.log("Current user:", user);
+    
+    if (!user) {
+        console.log("No user logged in");
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    if (user.role !== 'admin') {
+        console.log("User is not admin:", user.role);
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    console.log("Admin user verified, loading admin data...");
+    
+    // Update user info
+    updateAdminUserInfo();
+    
+    // Load all admin data
+    await loadAdminStats();
+    await loadAdminOrders();
+    await loadAdminProducts();
+    await loadAdminUsers();
+}
+
+// Update global logout function to handle admin page
+async function logout() {
+    try {
+        const result = await ApiService.logout();
+        localStorage.removeItem('currentUser');
+        
+        // Show logout success message
+        ModalService.showSuccessModal(
+            'Logged Out', 
+            'You have been successfully logged out. Redirecting to login page...',
+            { autoClose: true, timeout: 1500 }
+        );
+        
+        // Redirect based on current page
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+    } catch (error) {
+        console.error('Logout error:', error);
+        localStorage.removeItem('currentUser');
+        
+        ModalService.showSuccessModal(
+            'Logged Out', 
+            'You have been logged out. Redirecting to login page...',
+            { autoClose: true, timeout: 1500 }
+        );
+        
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+    }
+}
+
+// Add this function to ensure admin panel loads properly
+async function loadAdminPanel() {
+    console.log("loadAdminPanel() called");
+    
+    const user = getCurrentUser();
+    console.log("Current user:", user);
+    
+    // Check if user is admin
+    if (!user) {
+        console.log("No user logged in");
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    if (user.role !== 'admin') {
+        console.log("User is not admin:", user.role);
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    console.log("Admin user verified, loading admin data...");
+    
+    try {
+        // Load all admin data
+        await loadAdminStats();
+        await loadAdminOrders();
+        await loadAdminProducts();
+        await loadAdminUsers();
+        
+        console.log("Admin panel loaded successfully");
+    } catch (error) {
+        console.error("Error loading admin panel:", error);
+        ModalService.showErrorModal("Loading Error", "Failed to load admin data. Please try again.");
+    }
+}
+
+// Make sure switchTab function exists
+function switchTab(tabName) {
+    // Hide all tabs
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all buttons
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    const selectedTab = document.getElementById(tabName + 'Tab');
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+    }
+    
+    // Add active class to clicked button
+    const clickedButton = event.target;
+    clickedButton.classList.add('active');
 }
