@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>Order Confirmation - USM E-Mart</title>
+</head>
+<body>
+    <nav class="navTop">
+        <div class="navItem">
+            <p class="name">USM E-Mart - Order Confirmation</p>
+        </div>
+        <div class="navItem">
+            <a href="index.html" style="color: white; text-decoration: none;">← Back to Home</a>
+        </div>
+    </nav>
+    
+    <div class="confirmation-container">
+        <div class="confirmation-card">
+            <div class="confirmation-icon">✓</div>
+            <h1>Order Confirmed!</h1>
+            <p class="confirmation-message">
+                Thank you for your purchase. Your order has been received and is being processed.
+            </p>
+            
+            <div class="order-details">
+                <div class="detail-row">
+                    <span>Order ID:</span>
+                    <span id="orderId">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span>Order Date:</span>
+                    <span id="orderDate">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span>Total Amount:</span>
+                    <span id="orderTotal" style="font-weight: bold; color: #e53935;">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span>Payment Method:</span>
+                    <span id="paymentMethod">Loading...</span>
+                </div>
+            </div>
+            
+            <div class="shipping-info">
+                <h3>Pickup Information</h3>
+                <p id="shippingDetails">Loading...</p>
+                <p><strong>Note:</strong> Please bring your student ID for verification during pickup.</p>
+            </div>
+            
+            <div class="confirmation-actions">
+                <a href="index.html" class="btn-continue">Continue Shopping</a>
+                <a href="orders.html" class="btn-track">Track Your Order</a>
+            </div>
+            
+            <div class="confirmation-note">
+                <p>📧 You will receive an email confirmation shortly.</p>
+                <p>⏰ Expected pickup: Within 24 hours</p>
+                <p>📞 Seller will contact you for pickup arrangements</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderData = JSON.parse(localStorage.getItem('lastOrder') || '{}');
+            
+            if (!orderData.orderId) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Display order information
+            document.getElementById('orderId').textContent = orderData.orderId || 'N/A';
+            document.getElementById('orderDate').textContent = new Date().toLocaleDateString();
+            document.getElementById('orderTotal').textContent = 'RM ' + (orderData.total || 0).toFixed(2);
+            document.getElementById('paymentMethod').textContent = 
+                orderData.shippingInfo?.paymentMethod === 'card' ? 'Credit Card' : 'Cash on Pickup';
+            
+            if (orderData.shippingInfo) {
+                const shippingText = `
+                    ${orderData.shippingInfo.fullName} (${orderData.shippingInfo.matricNumber})<br>
+                    Phone: ${orderData.shippingInfo.phoneNumber}<br>
+                    Campus: ${orderData.shippingInfo.campus}<br>
+                    Pickup: ${orderData.shippingInfo.pickupLocation}
+                `;
+                document.getElementById('shippingDetails').innerHTML = shippingText;
+            }
+            
+            // Clear cart from localStorage
+            localStorage.removeItem('lastOrder');
+        });
+        
+        function viewOrder() {
+             window.location.href = 'orders.html';
+        }
+    </script>
+</body>
+</html>
