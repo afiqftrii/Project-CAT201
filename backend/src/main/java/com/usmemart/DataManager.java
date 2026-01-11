@@ -152,7 +152,7 @@ public class DataManager {
         }
     }
     
-    // Rest of the methods remain the same...
+    
     // Order management
     public static List<Order> loadOrders() {
         try {
@@ -255,7 +255,7 @@ public class DataManager {
     private static List<Product> createDefaultProducts() {
         List<Product> products = new ArrayList<>();
         
-        // All 12 products from your frontend
+        
         products.add(new Product("1", "Nike Shoes", 123.99, "Clothes", 
             "Hanafi Zaharuddin", "Used: Like New", "pic/kasut1.jpg", 
             "High-quality Nike running shoes in excellent condition"));
