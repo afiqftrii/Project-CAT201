@@ -84,40 +84,51 @@ const ApiService = {
 
     // ========== CART ==========
     async getCart() {
-        try {
-            console.log('Fetching cart...');
-            const response = await fetch(`${API_BASE_URL}/cart/`, {
-                credentials: 'include'
-            });
-            if (response.status === 401) {
-                console.log('User not logged in for cart');
-                return [];
-            }
-            const cart = await response.json();
-            console.log('Cart received:', cart);
-            return cart;
-        } catch (error) {
-            console.error('Get cart API error:', error);
+    try {
+        console.log('Fetching cart...');
+        const response = await fetch(`${API_BASE_URL}/cart`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        console.log('Cart response status:', response.status);
+        
+        if (response.status === 401) {
+            console.log('User not logged in for cart');
             return [];
         }
-    },
+        
+        if (!response.ok) {
+            console.log('Cart response not ok:', response.status);
+            return [];
+        }
+        
+        const cart = await response.json();
+        console.log('Cart received:', cart);
+        return cart;
+    } catch (error) {
+        console.error('Get cart API error:', error);
+        return [];
+    }
+   },
 
     async addToCart(productId) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/cart/`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ productId }),
-                credentials: 'include'
-            });
-            const result = await response.json();
-            console.log('Add to cart result:', result);
-            return result;
-        } catch (error) {
-            console.error('Add to cart API error:', error);
-            return { success: false, message: 'Failed to add to cart' };
-        }
-    },
+    try {
+        const response = await fetch(`${API_BASE_URL}/cart`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ productId: productId }),
+            credentials: 'include'
+        });
+        
+        const result = await response.json();
+        console.log('Add to cart result:', result);
+        return result;
+    } catch (error) {
+        console.error('Add to cart API error:', error);
+        return { success: false, message: 'Failed to add to cart' };
+    }
+   },
 
     async updateCartItem(productId, quantity) {
         try {
