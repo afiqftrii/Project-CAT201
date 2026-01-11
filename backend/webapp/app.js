@@ -12,6 +12,9 @@ function initializeApp() {
     
     // Always check login status first
     checkLoginStatus();
+
+    // Ensure cart is loaded for cart/checkout pages
+    ensureCartLoaded();
     
     if (isHomePage()) {
         // Set default active category to "All Product"
@@ -22,9 +25,18 @@ function initializeApp() {
             }
             loadProducts();
             
+            // Initialize scroll animations
+            initScrollAnimations();
+            
             // Update product count
             updateProductCount();
         }, 100);
+    }
+    
+    // Add this for orders page:
+    if (isOrdersPage()) {
+        // Orders page specific initialization
+        // The orders page has its own script in the HTML
     }
 }
 
@@ -49,6 +61,18 @@ function isCartPage() {
 
 function isAdminPage() {
     return window.location.pathname.includes('admin.html');
+}
+
+function isCheckoutPage() {
+    return window.location.pathname.includes('checkout.html');
+}
+
+function isOrderConfirmationPage() {
+    return window.location.pathname.includes('order-confirmation.html');
+}
+
+function isOrdersPage() {
+    return window.location.pathname.includes('orders.html');
 }
 
 // ========== MODAL SERVICE ==========
@@ -671,7 +695,23 @@ function setupEventListeners() {
 // ========== USER MANAGEMENT ==========
 function checkLoginStatus() {
     const user = getCurrentUser();
-    updateUIForLoggedInUser(user);
+    
+    // For home page, update the UI
+    if (isHomePage()) {
+        updateUIForLoggedInUser(user);
+    }
+    
+    // For other pages, just store the user data
+    if (!user && !isLoginPage()) {
+        // If not logged in and not on login page, check if we need to show login modal
+        const pendingAction = localStorage.getItem('pendingAction');
+        if (pendingAction) {
+            const action = JSON.parse(pendingAction);
+            if (action.action === 'checkout' && isCartPage()) {
+                ModalService.showLoginModal('checkout');
+            }
+        }
+    }
     
     // Check for pending actions after login
     ModalService.checkPendingAction();
@@ -683,14 +723,16 @@ function getCurrentUser() {
 }
 
 function updateUIForLoggedInUser(user) {
-    const buttonsDiv = document.querySelector('.buttons');
+    // First try to find the .buttons div
+    let buttonsDiv = document.querySelector('.nav-right .buttons');
+    
+    // If not found, try to find .nav-right directly
     if (!buttonsDiv) {
-        // For pages without .buttons div (like admin, cart), check nav-right
-        const navRight = document.querySelector('.nav-right');
-        if (navRight) {
-            // Admin/Cart page specific
-            return;
-        }
+        buttonsDiv = document.querySelector('.nav-right');
+    }
+    
+    if (!buttonsDiv) {
+        console.error('Could not find buttons container');
         return;
     }
     
@@ -701,34 +743,21 @@ function updateUIForLoggedInUser(user) {
             let adminButton = '';
             if (user.role === 'admin') {
                 adminButton = `
-                    <a href="admin.html" style="
-                        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-                        color: white;
-                        border: none;
-                        padding: 10px 15px;
-                        border-radius: 5px;
-                        cursor: pointer;
-                        font-weight: bold;
-                        text-decoration: none;
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 5px;
-                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                    " onmouseover="this.style.background='linear-gradient(135deg, #ff5252 0%, #ff3838 100%)'"
-                    onmouseout="this.style.background='linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)'">
-                        ⚙️ ADMIN
+                    <a href="admin.html" class="admin-panel-btn">
+                        <i class="fas fa-cog"></i>
+                        ADMIN
                     </a>
                 `;
             }
             
             buttonsDiv.innerHTML = `
                 ${adminButton}
-                <button class="sell">
-                    <img class="plusicon" src="pic/plus4.png" />
+                <button class="sell" onclick="handleSellClick()">
+                    <i class="fas fa-plus"></i>
                     SELL
                 </button>
-                <button class="Cart">
-                    <img class="carticon" src="pic/cart4.png" />
+                <button class="Cart" onclick="handleCartClick()">
+                    <i class="fas fa-shopping-cart"></i>
                     CART
                 </button>
                 <div class="user-info" style="
@@ -741,6 +770,10 @@ function updateUIForLoggedInUser(user) {
                     margin-left: 10px;
                 ">
                     <span style="color: white; font-weight: 500;">Hi, ${user.username}</span>
+                    <button onclick="window.location.href='orders.html'" 
+                            style="background: #4CAF50; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px;">
+                        Orders
+                    </button>
                     <button onclick="logout()" style="
                         background: rgba(255, 255, 255, 0.2);
                         color: white;
@@ -760,33 +793,16 @@ function updateUIForLoggedInUser(user) {
             // User is NOT logged in - show login button with action buttons
             buttonsDiv.innerHTML = `
                 <button class="sell" onclick="ModalService.showLoginModal('sell')">
-                    <img class="plusicon" src="pic/plus4.png" />
+                    <i class="fas fa-plus"></i>
                     SELL
                 </button>
                 <button class="Cart" onclick="ModalService.showLoginModal('view-cart')">
-                    <img class="carticon" src="pic/cart4.png" />
+                    <i class="fas fa-shopping-cart"></i>
                     CART
                 </button>
-                <button onclick="window.location.href='login.html'" 
-                        style="
-                            display: flex;
-                            align-items: center;
-                            gap: 8px;
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            color: white;
-                            border: none;
-                            padding: 12px 20px;
-                            border-radius: 30px;
-                            font-size: 16px;
-                            font-weight: bold;
-                            cursor: pointer;
-                            transition: all 0.3s ease;
-                            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-                            white-space: nowrap;
-                        " 
-                        onmouseover="this.style.background='linear-gradient(135deg, #764ba2 0%, #667eea 100%)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)'"
-                        onmouseout="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)'">
-                    🔐 LOGIN
+                <button onclick="window.location.href='login.html'" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    LOGIN
                 </button>
             `;
         }
@@ -853,137 +869,6 @@ function validateProductData(product) {
     return true;
 }
 
-async function loadProducts(category = null, search = null) {
-    console.log("Loading products... Category:", category, "Search:", search);
-    
-    const productGrid = document.querySelector('.productGrid');
-    
-    if (!productGrid) {
-        console.error("productGrid element not found!");
-        return;
-    }
-    
-    // Show loading animation
-    productGrid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
-            <div class="loading-spinner" style="
-                width: 50px;
-                height: 50px;
-                border: 5px solid #f3f3f3;
-                border-top: 5px solid #333;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-                margin: 0 auto 20px;
-            "></div>
-            <p>Loading products...</p>
-        </div>
-    `;
-    
-    try {
-        // Check URL hash for category
-        if (!category && window.location.hash) {
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            const urlCategory = hashParams.get('category');
-            if (urlCategory) {
-                category = decodeURIComponent(urlCategory);
-                // Don't update active category if it's "All Product" from URL
-                if (category !== 'All Product') {
-                    updateActiveCategory(category);
-                }
-            }
-        }
-        
-        // If no category specified and no active category, default to "All Product"
-        if (!category) {
-            const activeButton = document.querySelector('.navBot button.active-category');
-            if (!activeButton) {
-                category = 'All Product';
-                updateActiveCategory(category);
-            }
-        }
-        
-        // Get search query
-        const searchInput = document.querySelector('.searchInput');
-        const searchQuery = search || (searchInput ? searchInput.value.trim() : '');
-        
-        // Get products from API
-        // IMPORTANT: Pass "All Product" as null to API
-        const apiCategory = category === 'All Product' ? null : category;
-        const products = await ApiService.getProducts(apiCategory, searchQuery);
-        console.log("Products received:", products.length);
-        
-        if (!products || products.length === 0) {
-            let message = 'No products found';
-            if (category && category !== 'All Product') {
-                message = `No products found in "${category}" category`;
-            } else if (searchQuery) {
-                message = `No products found for "${searchQuery}"`;
-            }
-            
-            productGrid.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #666;">
-                    <div style="font-size: 60px; margin-bottom: 20px;">😕</div>
-                    <h3>${message}</h3>
-                    <button class="sell" onclick="window.location.href='sell.html'" 
-                            style="margin-top: 20px; padding: 10px 20px; font-size: 16px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        SELL YOUR FIRST ITEM
-                    </button>
-                    <br>
-                    <button onclick="loadProducts()" style="
-                        margin-top: 20px;
-                        padding: 10px 20px;
-                        background-color: #f0f0f0;
-                        color: #333;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                    ">
-                        Show All Products
-                    </button>
-                </div>
-            `;
-            return;
-        }
-        
-        // Clear and render products
-        productGrid.innerHTML = '';
-        products.forEach(product => {
-            if (!product || !product.id) {
-                console.error('Invalid product:', product);
-                return;
-            }
-            const productElement = createProductElement(product);
-            productGrid.innerHTML += productElement;
-        });
-        
-        // Update category counts
-        updateCategoryCounts(products);
-        
-        console.log("Finished loading", products.length, "products");
-        
-    } catch (error) {
-        console.error('Error loading products:', error);
-        productGrid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #666;">
-                <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
-                <h3>Unable to load products</h3>
-                <p>${error.message || 'Server connection error'}</p>
-                <button onclick="loadProducts()" style="
-                    margin-top: 20px;
-                    padding: 10px 20px;
-                    background-color: #333;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                ">
-                    Retry
-                </button>
-            </div>
-        `;
-    }
-}
-
 // Add this function to update product count in hero section
 async function updateProductCount() {
     try {
@@ -1002,7 +887,6 @@ async function updateProductCount() {
     }
 }
 
-// Update the loadProducts function to also update product count
 async function loadProducts(category = null, search = null) {
     console.log("Loading products... Category:", category, "Search:", search);
     
@@ -1152,28 +1036,6 @@ async function loadProducts(category = null, search = null) {
             </div>
         `;
     }
-}
-
-// Update initializeApp function to include scroll animations
-function initializeApp() {
-    setupEventListeners();
-    setupCategoryFilters();
-    
-    if (isHomePage()) {
-        // Set default active category to "All Product"
-        setTimeout(() => {
-            const activeButton = document.querySelector('.navBot button.active-category');
-            if (!activeButton) {
-                updateActiveCategory('All Product');
-            }
-            loadProducts();
-            
-            // Initialize scroll animations
-            initScrollAnimations();
-        }, 100);
-    }
-    
-    checkLoginStatus();
 }
 
 // Add scroll animation initialization
@@ -1462,8 +1324,11 @@ async function addToCart(productId, showModal = true) {
         return;
     }
     
+    console.log('Adding to cart - User:', user.id, 'Product:', productId);
+    
     try {
         const result = await ApiService.addToCart(productId);
+        console.log('Add to cart result:', result);
         
         if (result.success) {
             if (showModal) {
@@ -1476,6 +1341,10 @@ async function addToCart(productId, showModal = true) {
                         timeout: 3000
                     }
                 );
+            }
+            // Refresh cart if on cart page
+            if (isCartPage()) {
+                await loadCart();
             }
         } else {
             ModalService.showErrorModal('Failed to Add Item', result.message || 'Please try again.');
@@ -1900,306 +1769,44 @@ function handleCartClick() {
     }
 }
 
-// Update the UI function for the new structure
-function updateUIForLoggedInUser(user) {
-    const authButtons = document.querySelector('.auth-buttons');
-    if (!authButtons) return;
-    
-    if (user) {
-        // User is logged in
-        let adminLink = '';
-        if (user.role === 'admin') {
-            adminLink = `
-                <a href="admin.html" class="admin-btn">
-                    ⚙️ ADMIN
-                </a>
-            `;
-        }
-        
-        authButtons.innerHTML = `
-            ${adminLink}
-            <div class="user-info">
-                <span>Hi, ${user.username}</span>
-                <button onclick="logout()">Logout</button>
-            </div>
-        `;
-    } else {
-        // User is NOT logged in
-        authButtons.innerHTML = `
-            <button class="login-btn" onclick="window.location.href='login.html'">
-                🔐 LOGIN
-            </button>
-        `;
-    }
-}
-
-// Update event listeners for search
-function setupEventListeners() {
-    // Search functionality
-    const searchInput = document.querySelector('.searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') {
-                searchProducts(this.value);
-            }
-        });
+// CHECKOUT FUNCTION
+async function goToCheckout() {
+    const user = getCurrentUser();
+    if (!user) {
+        ModalService.showLoginModal('checkout');
+        return;
     }
     
-    // Search button using Font Awesome
-    const searchBtn = document.querySelector('.search-btn');
-    if (searchBtn) {
-        searchBtn.addEventListener('click', function() {
-            const searchInput = document.querySelector('.searchInput');
-            if (searchInput && searchInput.value) {
-                searchProducts(searchInput.value);
-            }
-        });
-    }
-    
-    // Category filters
-    setupCategoryFilters();
-    
-    // Login form
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
-    
-    // Sell form
-    const sellForm = document.getElementById('sellForm');
-    if (sellForm) {
-        sellForm.addEventListener('submit', handleSellItem);
-    }
-    
-    // Checkout button
-    const checkoutBtn = document.querySelector('.checkout-btn');
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', handleCheckout);
-    }
-    
-    // Image upload preview
-    const imageUpload = document.getElementById('imageUpload');
-    if (imageUpload) {
-        imageUpload.addEventListener('change', function() {
-            const preview = document.getElementById('imagePreview');
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    preview.innerHTML = `
-                        <img src="${e.target.result}" 
-                             style="max-width: 200px; max-height: 200px; border-radius: 5px; margin-top: 10px;">
-                        <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                            Image preview (${Math.round(imageUpload.files[0].size / 1024)} KB)
-                        </p>
-                    `;
-                }
-                
-                reader.readAsDataURL(this.files[0]);
-            }
-        });
-    }
-}
-
-// Update cart badge function
-async function updateCartBadge() {
     try {
         const cart = await ApiService.getCart();
-        const cartCount = cart.length;
-        
-        // Create or update cart badge
-        let badge = document.querySelector('.cart-badge');
-        if (!badge && cartCount > 0) {
-            badge = document.createElement('span');
-            badge.className = 'cart-badge';
-            document.querySelector('.cart-btn').appendChild(badge);
+        if (cart.length === 0) {
+            ModalService.showErrorModal('Empty Cart', 'Your cart is empty. Add some items first!');
+            return;
         }
         
-        if (badge) {
-            if (cartCount > 0) {
-                badge.textContent = cartCount > 9 ? '9+' : cartCount;
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
-        }
+        // Redirect to checkout page
+        window.location.href = 'checkout.html';
     } catch (error) {
-        console.error('Failed to update cart badge:', error);
+        console.error('Checkout error:', error);
+        ModalService.showErrorModal('Error', 'Failed to proceed to checkout.');
     }
 }
 
-// Icon fallback system
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if SVG icons loaded, fallback to images
-    setTimeout(() => {
-        // Check search icon
-        const searchIcon = document.querySelector('.search-icon');
-        const searchIconImg = document.querySelector('.search-icon-img');
-        if (searchIcon && searchIcon.clientHeight === 0) {
-            searchIcon.style.display = 'none';
-            if (searchIconImg) searchIconImg.style.display = 'block';
-        }
-        
-        // Check plus icon
-        const plusIcon = document.querySelector('.plus-icon');
-        const plusIconImg = document.querySelector('.plus-icon-img');
-        if (plusIcon && plusIcon.clientHeight === 0) {
-            plusIcon.style.display = 'none';
-            if (plusIconImg) plusIconImg.style.display = 'block';
-        }
-        
-        // Check cart icon
-        const cartIcon = document.querySelector('.cart-icon');
-        const cartIconImg = document.querySelector('.cart-icon-img');
-        if (cartIcon && cartIcon.clientHeight === 0) {
-            cartIcon.style.display = 'none';
-            if (cartIconImg) cartIconImg.style.display = 'block';
-        }
-    }, 1000);
-});
-
-// Add this function to handle admin user info display
-function updateAdminUserInfo() {
-    const user = getCurrentUser();
-    const userInfoDiv = document.getElementById('userInfoAdmin');
-    const logoutBtn = document.getElementById('logoutBtnAdmin');
-    
-    if (user && userInfoDiv) {
-        userInfoDiv.innerHTML = `
-            <div class="admin-user-details">
-                <span class="admin-email">${user.email}</span>
-                <span class="admin-role">(${user.role})</span>
-            </div>
-        `;
-    }
-    
-    // Always show logout button on admin page
-    if (logoutBtn) {
-        logoutBtn.style.display = 'flex';
-    }
-}
-
-// Update the loadAdminPanel function
-async function loadAdminPanel() {
-    console.log("loadAdminPanel() called");
-    
-    const user = getCurrentUser();
-    console.log("Current user:", user);
-    
-    if (!user) {
-        console.log("No user logged in");
-        window.location.href = 'login.html';
-        return;
-    }
-    
-    if (user.role !== 'admin') {
-        console.log("User is not admin:", user.role);
-        window.location.href = 'index.html';
-        return;
-    }
-    
-    console.log("Admin user verified, loading admin data...");
-    
-    // Update user info
-    updateAdminUserInfo();
-    
-    // Load all admin data
-    await loadAdminStats();
-    await loadAdminOrders();
-    await loadAdminProducts();
-    await loadAdminUsers();
-}
-
-// Update global logout function to handle admin page
-async function logout() {
-    try {
-        const result = await ApiService.logout();
-        localStorage.removeItem('currentUser');
-        
-        // Show logout success message
-        ModalService.showSuccessModal(
-            'Logged Out', 
-            'You have been successfully logged out. Redirecting to login page...',
-            { autoClose: true, timeout: 1500 }
-        );
-        
-        // Redirect based on current page
-        setTimeout(() => {
+async function ensureCartLoaded() {
+    if (isCartPage() || isCheckoutPage()) {
+        const user = getCurrentUser();
+        if (!user) {
+            // Redirect to login with pending action
+            localStorage.setItem('pendingAction', JSON.stringify({
+                action: isCartPage() ? 'view-cart' : 'checkout'
+            }));
             window.location.href = 'login.html';
-        }, 1500);
-    } catch (error) {
-        console.error('Logout error:', error);
-        localStorage.removeItem('currentUser');
+            return;
+        }
         
-        ModalService.showSuccessModal(
-            'Logged Out', 
-            'You have been logged out. Redirecting to login page...',
-            { autoClose: true, timeout: 1500 }
-        );
-        
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 1500);
+        // Cart page will handle its own loading
+        if (isCartPage()) {
+            await loadCart();
+        }
     }
-}
-
-// Add this function to ensure admin panel loads properly
-async function loadAdminPanel() {
-    console.log("loadAdminPanel() called");
-    
-    const user = getCurrentUser();
-    console.log("Current user:", user);
-    
-    // Check if user is admin
-    if (!user) {
-        console.log("No user logged in");
-        window.location.href = 'login.html';
-        return;
-    }
-    
-    if (user.role !== 'admin') {
-        console.log("User is not admin:", user.role);
-        window.location.href = 'index.html';
-        return;
-    }
-    
-    console.log("Admin user verified, loading admin data...");
-    
-    try {
-        // Load all admin data
-        await loadAdminStats();
-        await loadAdminOrders();
-        await loadAdminProducts();
-        await loadAdminUsers();
-        
-        console.log("Admin panel loaded successfully");
-    } catch (error) {
-        console.error("Error loading admin panel:", error);
-        ModalService.showErrorModal("Loading Error", "Failed to load admin data. Please try again.");
-    }
-}
-
-// Make sure switchTab function exists
-function switchTab(tabName) {
-    // Hide all tabs
-    const tabContents = document.querySelectorAll('.tab-content');
-    tabContents.forEach(tab => {
-        tab.classList.remove('active');
-    });
-    
-    // Remove active class from all buttons
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    tabButtons.forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Show selected tab
-    const selectedTab = document.getElementById(tabName + 'Tab');
-    if (selectedTab) {
-        selectedTab.classList.add('active');
-    }
-    
-    // Add active class to clicked button
-    const clickedButton = event.target;
-    clickedButton.classList.add('active');
 }
