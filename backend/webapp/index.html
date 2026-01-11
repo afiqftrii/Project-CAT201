@@ -1,32 +1,53 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/891/891419.png" type="image/png">
+    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
     <title>USM E-Mart</title>
 </head>
 <body>
     <nav class="navTop">
-        <div class="navItem">
-            <p class="name">
-                USM E-Mart
-            </p>
-        </div>
-        <div class="navItem">
-           <div class="search">
-                <input type="text" placeholder="Search..." class="searchInput">
-                <img src="./pic/searchicon4.png" width="20" height="20" alt="" class="searchIcon"/>
+        <!-- Left: Logo and Name -->
+        <div class="nav-left">
+            <div class="logo-container">
+                <div class="logo-circle">
+                    <i class="fas fa-shopping-bag logo-icon"></i>
+                </div>
+                <p class="name">
+                    USM E-Mart
+                </p>
             </div>
         </div>
-        <div class="buttons">
-            <button class="sell">
-                SELL
-                <img class="plusicon" src="pic/plus4.png" />
-            </button> 
-            <button class="Cart">
-                CART
-                <img class="carticon" src="pic/cart4.png" />
+        
+        <!-- Center: Search Bar -->
+        <div class="nav-center">
+            <div class="search">
+                <input type="text" placeholder="Search for items..." class="searchInput">
+                <button class="search-btn" type="button" aria-label="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Right: Action Buttons -->
+        <div class="nav-right">
+            <button class="sell" onclick="handleSellClick()">
+                <i class="fas fa-plus"></i>
+                <span>SELL</span>
             </button>
+            
+            <button class="cart-btn" onclick="handleCartClick()">
+                <i class="fas fa-shopping-cart"></i>
+                <span>CART</span>
+            </button>
+            
+            <div class="auth-buttons" id="authButtons">
+                <!-- Will be populated by JavaScript -->
+            </div>
         </div>
     </nav>
     <nav class="navBot">
