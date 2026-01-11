@@ -3,23 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/891/891419.png" type="image/png">
+    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
     <title>Admin Panel - USM E-Mart</title>
 </head>
 <body>
     <nav class="navTop">
-        <div class="navItem">
-            <p class="name">USM E-Mart - Admin Panel</p>
+        <div class="nav-left">
+            <div class="logo-container">
+                <div class="logo-circle">
+                    <i class="fas fa-shopping-bag logo-icon"></i>
+                </div>
+                <p class="name">
+                    USM E-Mart - Admin
+                </p>
+            </div>
         </div>
-        <div class="navItem">
-            <button onclick="logout()" style="background: #555; color: white; border: none; padding: 10px 15px; border-radius: 3px; cursor: pointer;">
-                Logout
+        
+        <div class="nav-center">
+            <div class="admin-title-container">
+                <h2 style="color: white; margin: 0; font-size: 20px;">Dashboard</h2>
+            </div>
+        </div>
+        
+        <div class="nav-right">
+            <div class="user-info-admin" id="userInfoAdmin">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            <button class="logout-btn" onclick="logout()" id="logoutBtnAdmin">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>LOGOUT</span>
             </button>
-            <a href="index.html" style="color: white; text-decoration: none; margin-left: 20px;">← Back to Home</a>
+            <a href="index.html" class="home-link">
+                <i class="fas fa-home"></i>
+                <span>HOME</span>
+            </a>
         </div>
     </nav>
     
     <div class="admin-container">
+        <!-- DASHBOARD CONTENT STARTS HERE -->
         <h2 class="admin-title">Admin Dashboard</h2>
         
         <!-- Stats Overview -->
@@ -65,6 +90,12 @@
                 </thead>
                 <tbody>
                     <!-- Orders will be loaded here -->
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px;">
+                            <div class="loading-spinner" style="margin: 0 auto;"></div>
+                            Loading orders...
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -85,6 +116,12 @@
                 </thead>
                 <tbody>
                     <!-- Products will be loaded here -->
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px;">
+                            <div class="loading-spinner" style="margin: 0 auto;"></div>
+                            Loading products...
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -104,11 +141,122 @@
                 </thead>
                 <tbody>
                     <!-- Users will be loaded here -->
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px;">
+                            <div class="loading-spinner" style="margin: 0 auto;"></div>
+                            Loading users...
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
+        <!-- DASHBOARD CONTENT ENDS HERE -->
     </div>
+    
     <script src="api-service.js"></script>
     <script src="app.js"></script>
+    <script>
+        // Admin page specific initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is admin first
+            const user = getCurrentUser();
+            if (!user || user.role !== 'admin') {
+                alert('Admin access required. Redirecting to login...');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Update user info
+            updateAdminUserInfo();
+            
+            // Load admin panel
+            loadAdminPanel();
+        });
+        
+        function updateAdminUserInfo() {
+            const user = getCurrentUser();
+            const userInfoDiv = document.getElementById('userInfoAdmin');
+            
+            if (user && userInfoDiv) {
+                userInfoDiv.innerHTML = `
+                    <div class="admin-user-details">
+                        <span class="admin-email">(${user.email})</span>
+                        <span class="admin-role">(${user.role})</span>
+                    </div>
+                `;
+            }
+        }
+        
+        // Override global logout to handle admin page
+        async function logout() {
+            try {
+                const result = await ApiService.logout();
+                localStorage.removeItem('currentUser');
+                
+                // Show logout success message
+                showLogoutMessage();
+                
+                // Redirect to login page after delay
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+            } catch (error) {
+                console.error('Logout error:', error);
+                localStorage.removeItem('currentUser');
+                showLogoutMessage();
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+            }
+        }
+        
+        function showLogoutMessage() {
+            // Create a success message
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            messageDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+                              stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span style="font-weight: bold;">Logged out successfully!</span>
+                </div>
+            `;
+            
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(messageDiv);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                messageDiv.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => messageDiv.remove(), 300);
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
