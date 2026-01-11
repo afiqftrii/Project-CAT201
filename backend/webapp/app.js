@@ -7,14 +7,18 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
-    // Remove this line:
-    // initData();
-    
-    // Keep rest as is:
     setupEventListeners();
+    setupCategoryFilters();
     
     if (isHomePage()) {
-        loadProducts();
+        // Set default active category to "All Product"
+        setTimeout(() => {
+            const activeButton = document.querySelector('.navBot button.active-category');
+            if (!activeButton) {
+                updateActiveCategory('All Product');
+            }
+            loadProducts();
+        }, 100);
     }
     
     checkLoginStatus();
@@ -521,6 +525,52 @@ class ModalService {
 // Add to window object for global access
 window.ModalService = ModalService;
 
+// ========== ENHANCED CATEGORY NAVIGATION FUNCTIONS ==========
+function setupCategoryFilters() {
+    const categoryButtons = document.querySelectorAll('.navBot button');
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const category = this.getAttribute('data-category') || this.textContent.trim();
+            filterByCategory(category);
+            
+            // Update active state
+            updateActiveCategory(category);
+            
+            // Add click animation
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+        
+        // Set data-category attribute for easier identification
+        const buttonText = button.textContent.replace(/[📦👕🏠📱📚]/g, '').trim();
+        button.setAttribute('data-category', buttonText);
+    });
+}
+
+function updateActiveCategory(selectedCategory) {
+    // Remove active class from all buttons
+    document.querySelectorAll('.navBot button').forEach(button => {
+        button.classList.remove('active-category');
+    });
+    
+    // Add active class to selected button
+    document.querySelectorAll('.navBot button').forEach(button => {
+        const buttonCategory = button.getAttribute('data-category') || button.textContent.replace(/[📦👕🏠📱📚]/g, '').trim();
+        if (buttonCategory === selectedCategory) {
+            button.classList.add('active-category');
+        }
+    });
+    
+    // Update URL hash for bookmarking
+    if (selectedCategory !== 'All Product') {
+        window.location.hash = `category=${encodeURIComponent(selectedCategory)}`;
+    } else {
+        window.location.hash = '';
+    }
+}
+
 // ========== EVENT LISTENERS ==========
 function setupEventListeners() {
     // SELL button - works on any page
@@ -568,13 +618,8 @@ function setupEventListeners() {
         });
     }
     
-    // Category filters
-    const categoryButtons = document.querySelectorAll('.navBot button');
-    categoryButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            filterByCategory(this.textContent.trim());
-        });
-    });
+    // Setup enhanced category filters
+    setupCategoryFilters();
     
     // Login form
     const loginForm = document.getElementById('loginForm');
@@ -739,8 +784,8 @@ function validateProductData(product) {
     return true;
 }
 
-async function loadProducts(category = null) {
-    console.log("Loading products... Category:", category);
+async function loadProducts(category = null, search = null) {
+    console.log("Loading products... Category:", category, "Search:", search);
     
     const productGrid = document.querySelector('.productGrid');
     
@@ -749,30 +794,89 @@ async function loadProducts(category = null) {
         return;
     }
     
-    productGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 50px;">Loading products...</div>';
+    // Show loading animation
+    productGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+            <div class="loading-spinner" style="
+                width: 50px;
+                height: 50px;
+                border: 5px solid #f3f3f3;
+                border-top: 5px solid #333;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+            "></div>
+            <p>Loading products...</p>
+        </div>
+    `;
     
     try {
-        // Get search query from input field
-        const searchInput = document.querySelector('.searchInput');
-        const searchQuery = searchInput ? searchInput.value.trim() : '';
+        // Check URL hash for category
+        if (!category && window.location.hash) {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const urlCategory = hashParams.get('category');
+            if (urlCategory) {
+                category = decodeURIComponent(urlCategory);
+                // Don't update active category if it's "All Product" from URL
+                if (category !== 'All Product') {
+                    updateActiveCategory(category);
+                }
+            }
+        }
         
-        // Pass BOTH category and search query to ApiService
-        const products = await ApiService.getProducts(category, searchQuery);
-        console.log("Products received:", products);
+        // If no category specified and no active category, default to "All Product"
+        if (!category) {
+            const activeButton = document.querySelector('.navBot button.active-category');
+            if (!activeButton) {
+                category = 'All Product';
+                updateActiveCategory(category);
+            }
+        }
+        
+        // Get search query
+        const searchInput = document.querySelector('.searchInput');
+        const searchQuery = search || (searchInput ? searchInput.value.trim() : '');
+        
+        // Get products from API
+        // IMPORTANT: Pass "All Product" as null to API
+        const apiCategory = category === 'All Product' ? null : category;
+        const products = await ApiService.getProducts(apiCategory, searchQuery);
+        console.log("Products received:", products.length);
         
         if (!products || products.length === 0) {
+            let message = 'No products found';
+            if (category && category !== 'All Product') {
+                message = `No products found in "${category}" category`;
+            } else if (searchQuery) {
+                message = `No products found for "${searchQuery}"`;
+            }
+            
             productGrid.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
-                    <h3>No products found</h3>
-                    <p>${searchQuery ? 'Try a different search term or ' : ''}category</p>
-                    <button class="sell" onclick="window.location.href='sell.html'">
-                        SELL ITEM
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #666;">
+                    <div style="font-size: 60px; margin-bottom: 20px;">😕</div>
+                    <h3>${message}</h3>
+                    <button class="sell" onclick="window.location.href='sell.html'" 
+                            style="margin-top: 20px; padding: 10px 20px; font-size: 16px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        SELL YOUR FIRST ITEM
+                    </button>
+                    <br>
+                    <button onclick="loadProducts()" style="
+                        margin-top: 20px;
+                        padding: 10px 20px;
+                        background-color: #f0f0f0;
+                        color: #333;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                    ">
+                        Show All Products
                     </button>
                 </div>
             `;
             return;
         }
         
+        // Clear and render products
         productGrid.innerHTML = '';
         products.forEach(product => {
             if (!product || !product.id) {
@@ -783,14 +887,29 @@ async function loadProducts(category = null) {
             productGrid.innerHTML += productElement;
         });
         
+        // Update category counts
+        updateCategoryCounts(products);
+        
         console.log("Finished loading", products.length, "products");
+        
     } catch (error) {
         console.error('Error loading products:', error);
         productGrid.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #666;">
+                <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
                 <h3>Unable to load products</h3>
-                <p>Error: ${error.message}</p>
-                <p>Please check if server is running at ${API_BASE_URL}</p>
+                <p>${error.message || 'Server connection error'}</p>
+                <button onclick="loadProducts()" style="
+                    margin-top: 20px;
+                    padding: 10px 20px;
+                    background-color: #333;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                ">
+                    Retry
+                </button>
             </div>
         `;
     }
@@ -832,7 +951,52 @@ function searchProducts(query) {
 }
 
 function filterByCategory(category) {
-    loadProducts(category);
+    console.log('Filtering by category:', category);
+    
+    // "All Product" should show all products (pass null)
+    if (category === 'All Product') {
+        loadProducts(null);
+    } else {
+        loadProducts(category);
+    }
+}
+
+// Function to update category counts
+function updateCategoryCounts(products) {
+    const categoryCounts = {
+        'All Product': products.length,
+        'Clothes': 0,
+        'Home Appliances': 0,
+        'Electronics': 0,
+        'Education': 0
+    };
+    
+    // Count products by category
+    products.forEach(product => {
+        if (product.category && categoryCounts.hasOwnProperty(product.category)) {
+            categoryCounts[product.category]++;
+        }
+    });
+    
+    // Update button labels with counts
+    document.querySelectorAll('.navBot button').forEach(button => {
+        const category = button.getAttribute('data-category') || button.textContent.replace(/[📦👕🏠📱📚]/g, '').trim();
+        const count = categoryCounts[category] || 0;
+        
+        // Remove existing count span
+        const existingCount = button.querySelector('.category-count');
+        if (existingCount) {
+            existingCount.remove();
+        }
+        
+        // Add count span if there are products
+        if (count > 0 && category !== 'All Product') {
+            const countSpan = document.createElement('span');
+            countSpan.className = 'category-count';
+            countSpan.textContent = count;
+            button.appendChild(countSpan);
+        }
+    });
 }
 
 async function viewProduct(productId) {
