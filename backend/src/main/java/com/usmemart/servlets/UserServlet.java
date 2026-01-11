@@ -77,7 +77,6 @@ public class UserServlet extends HttpServlet {
         }
         
         if (user != null) {
-            // Don't send password
             user.setPassword(null);
             PrintWriter out = response.getWriter();
             out.print(gson.toJson(user));
