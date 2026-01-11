@@ -44,8 +44,7 @@ public class ProductServlet extends HttpServlet {
         products = filtered;
     }
     
-    // Search by keyword
-    // In ProductServlet doGet method, fix the search logic:
+    // Search by keyword 
     if (search != null && !search.isEmpty()) {
     List<Product> searched = new java.util.ArrayList<>();
     String searchLower = search.toLowerCase();
