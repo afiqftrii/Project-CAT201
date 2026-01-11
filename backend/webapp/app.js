@@ -35,8 +35,13 @@ function initializeApp() {
     
     // Add this for orders page:
     if (isOrdersPage()) {
-        // Orders page specific initialization
-        // The orders page has its own script in the HTML
+        // Orders page has its own script
+    }
+    
+    // Add this for checkout page
+    if (isCheckoutPage()) {
+        // Checkout page will handle its own loading
+        console.log('Checkout page detected');
     }
 }
 
@@ -1417,6 +1422,7 @@ async function loadCart() {
     
     try {
         const cart = await ApiService.getCart();
+        console.log('Cart items received:', cart);
         
         if (cart.length === 0) {
             cartContent.innerHTML = `
@@ -1483,6 +1489,10 @@ async function loadCart() {
 }
 
 async function updateCartQuantity(productId, newQuantity) {
+    if (newQuantity < 1) {
+        newQuantity = 1;
+    }
+    
     try {
         const result = await ApiService.updateCartItem(productId, newQuantity);
         if (result.success) {
@@ -1510,6 +1520,7 @@ async function removeFromCart(productId) {
     }
 }
 
+// This is the problematic function that was being called incorrectly
 async function handleCheckout() {
     const user = getCurrentUser();
     if (!user) {
@@ -1524,47 +1535,11 @@ async function handleCheckout() {
             return;
         }
         
-        // Calculate totals
-        let subtotal = 0;
-        cart.forEach(item => {
-            subtotal += item.price * item.quantity;
-        });
-        const fee = subtotal * 0.02;
-        const total = subtotal + fee;
-        
-        const orderData = {
-            items: cart,
-            subtotal: subtotal,
-            fee: fee,
-            total: total
-        };
-        
-        const result = await ApiService.createOrder(orderData);
-        
-        if (result.success) {
-            ModalService.showSuccessModal(
-                'Order Placed!',
-                `Thank you for your purchase!<br><br>
-                 Order ID: ${result.orderId}<br>
-                 Total: RM${total.toFixed(2)}<br><br>
-                 You will be redirected to home page.`,
-                {
-                    showCartButton: false,
-                    autoClose: false,
-                    timeout: 5000
-                }
-            );
-            
-            // Redirect after 5 seconds
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 5000);
-        } else {
-            ModalService.showErrorModal('Order Failed', result.message || 'Failed to place order.');
-        }
+        // Instead of trying to process checkout here, redirect to checkout page
+        window.location.href = 'checkout.html';
     } catch (error) {
         console.error('Checkout error:', error);
-        ModalService.showErrorModal('Error', 'Failed to place order. Please try again.');
+        ModalService.showErrorModal('Error', 'Failed to proceed to checkout.');
     }
 }
 
@@ -1769,7 +1744,7 @@ function handleCartClick() {
     }
 }
 
-// CHECKOUT FUNCTION
+// FIXED: CHECKOUT FUNCTION - Now properly redirects to checkout page
 async function goToCheckout() {
     const user = getCurrentUser();
     if (!user) {
@@ -1779,10 +1754,14 @@ async function goToCheckout() {
     
     try {
         const cart = await ApiService.getCart();
+        console.log('Cart for checkout:', cart);
         if (cart.length === 0) {
             ModalService.showErrorModal('Empty Cart', 'Your cart is empty. Add some items first!');
             return;
         }
+        
+        // Store cart data temporarily for checkout page
+        localStorage.setItem('checkoutCart', JSON.stringify(cart));
         
         // Redirect to checkout page
         window.location.href = 'checkout.html';
@@ -1808,5 +1787,22 @@ async function ensureCartLoaded() {
         if (isCartPage()) {
             await loadCart();
         }
+        
+        // Checkout page will handle its own loading
+        // The checkout.html has its own script to load order summary
     }
 }
+
+// Make functions globally accessible
+window.goToCheckout = goToCheckout;
+window.handleSellClick = handleSellClick;
+window.handleCartClick = handleCartClick;
+window.addToCart = addToCart;
+window.updateCartQuantity = updateCartQuantity;
+window.removeFromCart = removeFromCart;
+window.viewProduct = viewProduct;
+window.closeModal = closeModal;
+window.loadCart = loadCart;
+window.filterByCategory = filterByCategory;
+window.searchProducts = searchProducts;
+window.logout = logout;
