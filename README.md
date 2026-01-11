@@ -33,3 +33,24 @@ Purpose: Builds the project and manages dependencies
 3.Apache Tomcat 9.0.113
 Download: https://tomcat.apache.org/download-90.cgi
 Choose: apache-tomcat-9.0.113-windows-x64.zip (Windows)
+
+###Setup
+1.Make sure to run this in command in terminal to reset war file
+cd backend
+mvn clean
+mvn compile
+mvn package
+
+2.Go to Project-CAT201/backend/target then copy the newly generated usm-emart.war
+
+3.Paste it in your Apache Program Files in webapps folder (e.g: C:\Users\AFIQFRII\Downloads\apache-tomcat-9.0.113\apache-tomcat-9.0.113\webapps)
+
+4.Start the tomcat server.
+
+5.Go to Project-CAT201/backend/webapp and copy "admin.html","api-service.js","app.js","cart.html","index.html","login.html","sell.html"."style.css" and pic folder.
+
+6.Paste these files and folder in your Apache Program FIles in webapp folder (e.g: C:\Users\AFIQFRII\Downloads\apache-tomcat-9.0.113\apache-tomcat-9.0.113\webapps)
+
+7.Refresh the localhost:8080 page and then enter localhost:8080/usm-emart
+
+8.The website should be functional as long the setup are executed properly.
