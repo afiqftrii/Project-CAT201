@@ -915,6 +915,213 @@ async function loadProducts(category = null, search = null) {
     }
 }
 
+// Add this function to update product count in hero section
+async function updateProductCount() {
+    try {
+        const products = await ApiService.getProducts();
+        const countElement = document.getElementById('totalProductsCount');
+        if (countElement && products) {
+            countElement.textContent = products.length + '+';
+            
+            // Also update after loading products
+            setTimeout(() => {
+                countElement.textContent = products.length + '+';
+            }, 1000);
+        }
+    } catch (error) {
+        console.log('Could not update product count:', error);
+    }
+}
+
+// Update the loadProducts function to also update product count
+async function loadProducts(category = null, search = null) {
+    console.log("Loading products... Category:", category, "Search:", search);
+    
+    const productGrid = document.querySelector('.productGrid');
+    
+    if (!productGrid) {
+        console.error("productGrid element not found!");
+        return;
+    }
+    
+    // Show loading animation
+    productGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+            <div class="loading-spinner" style="
+                width: 60px;
+                height: 60px;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #667eea;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+            "></div>
+            <p style="color: #666; font-size: 18px;">Loading amazing products...</p>
+        </div>
+    `;
+    
+    try {
+        // Check URL hash for category
+        if (!category && window.location.hash) {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const urlCategory = hashParams.get('category');
+            if (urlCategory) {
+                category = decodeURIComponent(urlCategory);
+                // Don't update active category if it's "All Product" from URL
+                if (category !== 'All Product') {
+                    updateActiveCategory(category);
+                }
+            }
+        }
+        
+        // If no category specified and no active category, default to "All Product"
+        if (!category) {
+            const activeButton = document.querySelector('.navBot button.active-category');
+            if (!activeButton) {
+                category = 'All Product';
+                updateActiveCategory(category);
+            }
+        }
+        
+        // Get search query
+        const searchInput = document.querySelector('.searchInput');
+        const searchQuery = search || (searchInput ? searchInput.value.trim() : '');
+        
+        // Get products from API
+        // IMPORTANT: Pass "All Product" as null to API
+        const apiCategory = category === 'All Product' ? null : category;
+        const products = await ApiService.getProducts(apiCategory, searchQuery);
+        console.log("Products received:", products.length);
+        
+        // Update product count in hero section
+        updateProductCount();
+        
+        if (!products || products.length === 0) {
+            let message = 'No products found';
+            if (category && category !== 'All Product') {
+                message = `No products found in "${category}" category`;
+            } else if (searchQuery) {
+                message = `No products found for "${searchQuery}"`;
+            }
+            
+            productGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #666; animation: fadeIn 0.5s ease;">
+                    <div style="font-size: 80px; margin-bottom: 20px; opacity: 0.5;">😕</div>
+                    <h3 style="font-size: 24px; margin-bottom: 15px;">${message}</h3>
+                    <p style="margin-bottom: 30px; font-size: 16px;">Be the first to list an item in this category!</p>
+                    <button class="sell" onclick="window.location.href='sell.html'" 
+                            style="margin-top: 20px; padding: 15px 30px; font-size: 16px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); transition: all 0.3s ease;">
+                        🚀 SELL YOUR FIRST ITEM
+                    </button>
+                    <br>
+                    <button onclick="loadProducts()" style="
+                        margin-top: 20px;
+                        padding: 12px 25px;
+                        background: #f8f9fa;
+                        color: #333;
+                        border: none;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.background='#e9ecef'"
+                    onmouseout="this.style.background='#f8f9fa'">
+                        🔄 Show All Products
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        // Clear and render products with animation
+        productGrid.innerHTML = '';
+        products.forEach((product, index) => {
+            if (!product || !product.id) {
+                console.error('Invalid product:', product);
+                return;
+            }
+            const productElement = createProductElement(product);
+            const productDiv = document.createElement('div');
+            productDiv.innerHTML = productElement;
+            productDiv.style.animationDelay = `${index * 0.1}s`;
+            productDiv.classList.add('animate-on-scroll');
+            productGrid.appendChild(productDiv);
+            
+            // Make element visible after a delay for animation
+            setTimeout(() => {
+                productDiv.classList.add('visible');
+            }, 100);
+        });
+        
+        // Update category counts
+        updateCategoryCounts(products);
+        
+        console.log("Finished loading", products.length, "products");
+        
+    } catch (error) {
+        console.error('Error loading products:', error);
+        productGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #666;">
+                <div style="font-size: 80px; margin-bottom: 20px;">⚠️</div>
+                <h3 style="font-size: 24px; margin-bottom: 15px;">Unable to load products</h3>
+                <p style="margin-bottom: 30px;">${error.message || 'Server connection error'}</p>
+                <button onclick="loadProducts()" style="
+                    margin-top: 20px;
+                    padding: 15px 30px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                    transition: all 0.3s ease;
+                " onmouseover="this.style.background='linear-gradient(135deg, #764ba2 0%, #667eea 100%)'"
+                onmouseout="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'">
+                    🔄 Try Again
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Update initializeApp function to include scroll animations
+function initializeApp() {
+    setupEventListeners();
+    setupCategoryFilters();
+    
+    if (isHomePage()) {
+        // Set default active category to "All Product"
+        setTimeout(() => {
+            const activeButton = document.querySelector('.navBot button.active-category');
+            if (!activeButton) {
+                updateActiveCategory('All Product');
+            }
+            loadProducts();
+            
+            // Initialize scroll animations
+            initScrollAnimations();
+        }, 100);
+    }
+    
+    checkLoginStatus();
+}
+
+// Add scroll animation initialization
+function initScrollAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
+    });
+}
+
 function createProductElement(product) {
     return `
         <div class="productLayout">
