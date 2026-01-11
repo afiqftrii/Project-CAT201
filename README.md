@@ -41,7 +41,8 @@ USM E-Mart is an e-commerce platform exclusively for USM students to buy and sel
 - │   │   │   ├── AdminServlet.java
 - │   │   │   ├── UserServlet.java
 - │   │   │   ├── SpecificProductServlet.java
-- │   │   │   └── LogoutServlet.java
+- │   │   │   ├── LogoutServlet.java
+- |   |   |   └── ImageServlet.java
 - │   │   └── filters/
 - │   │       └── CorsFilter.java
 - │   ├── src/main/webapp/
@@ -54,7 +55,10 @@ USM E-Mart is an e-commerce platform exclusively for USM students to buy and sel
 - │   │   ├── app.js 
 - │   │   ├── api-service.js 
 - │   │   ├── pic/ (images)
-- │   │   └── WEB-INF/web.xml
+- │   │   ├── WEB-INF/web.xml
+- |   |   ├── orders.html
+- |   |   ├── order-confirmation.html
+- |   |   └── checkout.html
 - │   └── pom.xml
 - └── ~/usm-emart-data/ (created at runtime)
 -   ├── users.json (auto-generated)
